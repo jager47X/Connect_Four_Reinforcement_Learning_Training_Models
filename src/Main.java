@@ -53,7 +53,7 @@ public class Main {
 
         } while (game.CheckCells());
 
-
+        keyboard.close();
     }
 
 

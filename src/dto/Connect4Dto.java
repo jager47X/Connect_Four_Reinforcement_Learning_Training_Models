@@ -45,7 +45,7 @@ public class Connect4Dto extends BaseDto{
     
     @Override
     public void exportCSV() {
-        try (FileWriter writer = new FileWriter( CSV.getPath())) {
+        try (FileWriter writer = new FileWriter(CSV.getPath())) {
 
             for (int i = 0; i <ImportedData.size() ; i++) {//imported board
                 writer.append(ImportedData.get(i));

@@ -1,21 +1,25 @@
 package target;
 
 public class Connect4 {
-        private static final int COLS_SIZE = 7;
-        private static final int ROWS_SIZE = 6;
+        private  final int COLS_SIZE = 7;
+        private  final int ROWS_SIZE = 6;
         public final char PLAYER1 = 'X';
         public final char PLAYER2 = 'O';
         public final char EMPTY = '_';
-        private static final int SIZE_OF_BOARD=COLS_SIZE*ROWS_SIZE;
+        private  final int SIZE_OF_BOARD=COLS_SIZE*ROWS_SIZE;
         private char activePlayer;
 
-        public static final char[] board = new char[SIZE_OF_BOARD];
+        public final char[] board = new char[SIZE_OF_BOARD];
         private int turn = 0;
         private int winner = -1;
         private int position;
         private int location;
 
-        public Connect4() {
+    public int getSIZE_OF_BOARD() {
+        return SIZE_OF_BOARD;
+    }
+
+    public Connect4() {
             ResetBoard();
         }
 

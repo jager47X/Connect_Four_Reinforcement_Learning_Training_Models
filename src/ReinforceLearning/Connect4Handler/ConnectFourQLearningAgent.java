@@ -2,7 +2,27 @@ package ReinforceLearning.Connect4Handler;
 
 import ReinforceLearning.AbstractQLearningAgent;
 
-public class ConnectFourQLearningAgent extends AbstractQLearningAgent {
+
+
+public class ConnectFourQLearningAgent <T extends Comparable<AbstractQLearningAgent>>extends AbstractQLearningAgent {
+
+    int currentPlayer;//connect4
+
+    public ConnectFourQLearningAgent(Object[] environment, Object qTable) {
+        super(environment, qTable);
+    }
+
+    @Override
+    protected int getBestAction(int state) {
+        return 0;
+    }
+
+    @Override
+    protected void performEpisode() {
+
+    }
+
+
     // Additional Connect Four-specific methods and logic go here
 
     // Implement interface methods
@@ -11,6 +31,7 @@ public class ConnectFourQLearningAgent extends AbstractQLearningAgent {
     public void resetBoard() {
         // Implement resetBoard for Connect Four
     }
+
 
     @Override
     public int[] makeMove(int action) {
@@ -42,10 +63,22 @@ public class ConnectFourQLearningAgent extends AbstractQLearningAgent {
     }
 
     @Override
-    public int stateToIndex(int[][] state) {
-        // Implement stateToIndex for Connect Four
+    public int stateToIndex(Object state) {
         return 0;
     }
+
+    @Override
+    public int selectAction() {
+        return 0;
+    }
+
+
+    public int stateToIndex(T state) {
+        return 0;
+    }
+
+
+
 
     // Additional Connect Four-specific methods and logic go here
 }
