@@ -21,9 +21,4 @@ public abstract class BaseDao  <T extends BaseDto> {
             return "";
         }
 
-
-
-
-
-
 }

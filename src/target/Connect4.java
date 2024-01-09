@@ -13,6 +13,7 @@ public class Connect4 {
         private int turn = 0;
         private int winner = -1;
         private int position;
+        private int location;
 
         public Connect4() {
             ResetBoard();
@@ -52,6 +53,7 @@ public class Connect4 {
                         System.out.println("position:"+position+" = col_size:7 *row:"+row+" +col:"+dropChoice);
                         board[position] = activePlayer;
                         turn++;
+                        this.location=this.position;
                         return true;
                     }
                 }
@@ -66,12 +68,18 @@ public class Connect4 {
             return column >= 0 && column < COLS_SIZE;
         }
 
-        public void SetPosition(int col, int row) {
+    public int getLocation() {
+        return location;
+    }
+
+    public void setLocation(int location) {
+        this.location = location;
+    }
+
+    public void SetPosition(int col, int row) {
             position= row * COLS_SIZE + col;
         }
-        public int getPosition() {
-            return position;
-        }
+
         public void DisplayBoard() {
             for (int cell = 0; cell < SIZE_OF_BOARD; cell++) {
                 System.out.print(board[cell]);

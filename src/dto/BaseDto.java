@@ -1,30 +1,34 @@
 package dto;
 
 
+import dao.CSV;
 import target.Connect4;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseDto<Data extends Comparable<Data>> {
-    private Data data;
-   // abstract List<Data> query(Data filter);
-    public BaseDto(Data csv) {
-        this.data = csv;
-    }
-    public BaseDto(Connect4 board) {
+public abstract class BaseDto  {
 
-    }
-    public Data getData() {
-        return data;
+    //id?
+    List<String> ImportedData;
+
+    public BaseDto(List<String> ImportedData) {
+        this.ImportedData=ImportedData;
     }
 
-    public void compareWith(BaseDto<Data> other) {
-        int result = this.data.compareTo(other.data);
-        System.out.println("Comparison result: " + result);
+    public List<String> getImportedData() {
+        return ImportedData;
     }
 
-    public abstract void exportCSV();
+    public void setImportedData(List<String> importedData) {
+        ImportedData = importedData;
+    }
 
-    public abstract Data import_CSV();
+    public BaseDto() {
+    }
+
+    public abstract  void exportCSV() ;
+
+    public abstract void import_CSV();
 }
 

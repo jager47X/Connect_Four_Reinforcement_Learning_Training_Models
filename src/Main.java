@@ -13,6 +13,7 @@ public class Main {
         Scanner keyboard = new Scanner(System.in);
         game.setActivePlayer(game.PLAYER2);
         Connect4Dto dto=new Connect4Dto(game);
+       dto.import_CSV();
         do {
             game.setActivePlayer((game.getActivePlayer() == game.PLAYER2) ? game.PLAYER1 : game.PLAYER2);
             turn++;
@@ -31,13 +32,22 @@ public class Main {
 
             }//chip is set
 
-            if (game.WinCheck()) {//check win
-                System.out.println((game.getActivePlayer() == game.PLAYER1) ? "player1 Won" : "player2 Won");
+            if (game.WinCheck()) {//check winner 1 or 2
+
+                System.out.println((game.getActivePlayer() == game.PLAYER1) ? "player1 Won!" : "player2 Won!");
+
                 game.DisplayBoard();
-                System.out.println(dto.hashing());// to board
+                dto.addLine(turn);
+                dto.exportCSV();
+                break;
+            }else if(game.getWinner()==0){//withdraw
+                System.out.println("Withdraw!");
+                game.DisplayBoard();
+                dto.addLine(turn);
+                dto.exportCSV();
                 break;
             }else{
-                System.out.println(dto.hashing());
+                dto.addLine(turn);//why 35?
             }
 
 
