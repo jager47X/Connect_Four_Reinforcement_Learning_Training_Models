@@ -2,23 +2,30 @@ package dao;
 
 
 import dto.BaseDto;
-import target.Connect4;
+import dto.QTableDto;
 
-import java.util.HashMap;
+import java.util.List;
 
-public abstract class BaseDao  <T extends BaseDto> {
+public abstract class BaseDao <T extends BaseDto> {
 
-        // Constructor
-        public BaseDao() {
+        public BaseDao( ) {
+        }
+
+        public void addLine(int turn, T dto) {
+                while(turn>dto.getHashedData().size()){
+                       turn--;
+                }
+                dto.getHashedData().add(turn, dto.hashing());
+                System.out.println("turn: " + turn );
+               System.out.println("Total Size of HashedData: " + dto.getHashedData().size() );
+                System.out.println("Total Line:");
+                for (String Line : dto.getHashedData()) {
+                        System.out.println(Line);
+                }
+
 
         }
 
-    // Getter methods
 
-        // toString method for easy printing
-        @Override
-        public String toString() {
-            return "";
-        }
 
 }
