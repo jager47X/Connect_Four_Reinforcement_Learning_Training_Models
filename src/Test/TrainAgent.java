@@ -6,26 +6,21 @@ import target.Connect4;
 
 import java.util.Scanner;
 
-public class TrainAgent {
+public class TrainAgent {//cannot train 5++ at a time due to thread error
 
         public static void main(String[] args) {
-            //train agent// choose human or self learn or train agent
-            //for human interaction episodes=1;
-            Connect4 game = new Connect4();
-            Connect4Dto connect4Dto = new Connect4Dto(game);
-            Scanner keyboard = new Scanner(System.in);
-            System.out.print("Enter Number of Train Agent \ninput 1:human interaction\ninput more than 1:self-test\ninput:");
-            int trainNum=100;
+            int trainNum=5;
             for (int i = 0; i < trainNum; i++) {
                 double process = (double) i / trainNum * 100;
+                Connect4 game = new Connect4();
+                Connect4Dto connect4Dto = new Connect4Dto(game);
                 ReinforceLearningAgentConnectFour Agent = new ReinforceLearningAgentConnectFour(connect4Dto);
                 Agent.trainAgent();
                 if (process < 100) {
                     System.out.println("train: In process..." + process + "/100%: "+i+"|"+trainNum);
                 }
-
             }
-            System.out.println("train:Completed");
+            System.out.println("train: 100/100%: "+trainNum+"|"+trainNum);
 
         }
 }

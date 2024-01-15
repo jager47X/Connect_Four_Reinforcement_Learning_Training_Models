@@ -9,8 +9,8 @@ import target.Connect4;
 import java.util.Random;
 
 interface ReinforceLearningAgent2D{
-    void trainAgent(boolean humanInteraction);
-    void testAgent(boolean humanInteraction);
+    void trainAgent(int episode);
+    void testAgent(int episode);
     void trainAgent();
     void testAgent();
     boolean makeMove(int action);

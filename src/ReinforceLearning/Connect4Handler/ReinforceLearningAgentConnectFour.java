@@ -11,6 +11,8 @@ import target.RuleBasedAI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class  ReinforceLearningAgentConnectFour extends AbstractReinforceLearningAgent2D {
@@ -24,7 +26,6 @@ public class  ReinforceLearningAgentConnectFour extends AbstractReinforceLearnin
     public void trainAgent() {//use multi-thread //if epsodes=1 then vs human if not ai vs ai
 
         QTableDto qTableDto=new QTableDto(Environment);
-        Scanner keyboard = new Scanner(System.in);
         //  for (int i = 0; i <episodes ; i++) {//set how many times to play
         Environment.setActivePlayer(Connect4.PLAYER2);
         Environment.setTurn(0);
@@ -113,66 +114,56 @@ public class  ReinforceLearningAgentConnectFour extends AbstractReinforceLearnin
 
     }
     @Override
-    public void trainAgent(boolean humanInteraction) {//use multi-thread //if epsodes=1 then vs human if not ai vs ai
-
+    public void trainAgent(int episodes) {
         QTableDto qTableDto=new QTableDto(Environment);
-        Scanner keyboard = new Scanner(System.in);
-      //  for (int i = 0; i <episodes ; i++) {//set how many times to play
-            Environment.setActivePlayer(Connect4.PLAYER2);
-            Environment.setTurn(0);
-            loadQTableFromCSV(QTable);
-            //USE AI
-            resetBoard(Environment);
-            do {
-                //update environment/state
-                Environment = connect4Dto.getGame();
-                printBoard(Environment);
-                if (Environment.getActivePlayer() == Connect4.PLAYER1) {//switch player
-                    Environment.setActivePlayer(Connect4.PLAYER2);
-                    Environment.setNonActivePlayer(Connect4.PLAYER1);
-                } else {
-                    Environment.setActivePlayer(Connect4.PLAYER1);
-                    Environment.setNonActivePlayer(Connect4.PLAYER2);
-                }
-                if(Environment.getActivePlayer() ==Connect4.PLAYER1){//player move
-                    if(humanInteraction){
-                        //human drop
-                        Environment.playerDrop(keyboard.nextInt());
-                    }else{// AI move
-                        if (!Environment.playerDrop(RuleBasedAI.makeMove(Environment.getBoard(),Environment.getActivePlayer(),Environment.getNonActivePlayer()))) {//update move
-                            throw new ArithmeticException("Error- Unable to update an action");
-                        }
-                    }
-                }else{//AI move
-                    if (!Environment.playerDrop(RuleBasedAI.makeMove(Environment.getBoard(),Environment.getActivePlayer(),Environment.getNonActivePlayer()))) {//update move
-                        throw new ArithmeticException("Error- Unable to update an action");
-                    }
-                }
+        //  for (int i = 0; i <episodes ; i++) {//set how many times to play
+        Environment.setActivePlayer(Connect4.PLAYER2);
+        Environment.setTurn(0);
+        loadQTableFromCSV(QTable);
+        //USE AI
+        resetBoard(Environment);
+        do {
+            if(isGameOver(Environment)){
+                Environment.setWinner(0);
+                saveQTableToCSV(qTableDto);
+                break;
+            }
+            //update environment/state
+            Environment = connect4Dto.getGame();
 
-               // calculateReward(board.getGame(),);
-                if (Environment.winCheck()) {//check winner 1 or 2
-                    System.out.println((Environment.getActivePlayer() == Connect4.PLAYER1) ? "player1 Won!" : "player2 Won!");
-                    QTable.addLine(Environment.getTurn(),qTableDto);
-                    printBoard(Environment);
-                    saveQTableToCSV(qTableDto);
-                    break;
-                }else if(Environment.getWinner()==0){//withdraw
-                    System.out.println("Withdraw!");
-                    QTable.addLine(Environment.getTurn(),qTableDto);
-                    printBoard(Environment);
-                   saveQTableToCSV(qTableDto);
-                    break;
-                }else{
-                    QTable.addLine(Environment.getTurn(),qTableDto);
-                }
-            }while(!isGameOver(Environment));
-        printBoard(Environment);
-        }
+            if (Environment.getActivePlayer() == Connect4.PLAYER1) {//switch player
+                Environment.setActivePlayer(Connect4.PLAYER2);
+                Environment.setNonActivePlayer(Connect4.PLAYER1);
+            } else {
+                Environment.setActivePlayer(Connect4.PLAYER1);
+                Environment.setNonActivePlayer(Connect4.PLAYER2);
+            }
+            while(!Environment.playerDrop(RuleBasedAI.makeMove(Environment.getBoard(),Environment.getActivePlayer(),Environment.getNonActivePlayer()))) {//update move
+                Environment.playerDrop(RuleBasedAI.makeMove(Environment.getBoard(),Environment.getActivePlayer(),Environment.getNonActivePlayer()));
+            }
+            // calculateReward(board.getGame(),);
+            if (Environment.winCheck()) {//check winner 1 or 2
+                QTable.addLine(Environment.getTurn(),qTableDto);
+                saveQTableToCSV(qTableDto);
+                break;
+            }else if(Environment.getWinner()==0){//withdraw
+                QTable.addLine(Environment.getTurn(),qTableDto);
+                saveQTableToCSV(qTableDto);
+                break;
+            }else{
+                QTable.addLine(Environment.getTurn(),qTableDto);
+            }
+        }while(!isGameOver(Environment));
+
+
+
+
+    }
    // }
 
   
     @Override
-    public void testAgent(boolean humanInteraction) {//self learning or with player //use multi-thread
+    public void testAgent(int episode) {//self learning or with player //use multi-thread
 
         QTableDto qTableDto=new QTableDto(Environment);
         Scanner keyboard = new Scanner(System.in);
@@ -193,7 +184,7 @@ public class  ReinforceLearningAgentConnectFour extends AbstractReinforceLearnin
                     Environment.setNonActivePlayer(Connect4.PLAYER2);
                 }
                 if(Environment.getActivePlayer() ==Connect4.PLAYER1){//player move
-                    if(humanInteraction){
+                    if(episode==0){
                         //human drop
                         Environment.playerDrop(keyboard.nextInt());
                     }else{// AI move

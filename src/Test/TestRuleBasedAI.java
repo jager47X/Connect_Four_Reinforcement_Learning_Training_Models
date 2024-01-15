@@ -36,8 +36,12 @@ public class TestRuleBasedAI {
                         System.out.println("Player 2: select between 1-7>>" );
                         input=RuleBasedAI.makeMove(game.getBoard(),Connect4.PLAYER2,Connect4.PLAYER1);
                     }
+
+                    if (game.playerDrop(input)) {
+                        System.out.println((game.getActivePlayer() == Connect4.PLAYER1) ? "player1: selected "+ input : "player2: selected" + input);
+                        break;
+                    }
                     //check AI drop if it is valid
-                    System.out.println((game.getActivePlayer() == Connect4.PLAYER1) ? "player1: selected "+ input : "player2: selected" + input);
                 } while (true);
 
             }//chip is set

@@ -15,7 +15,7 @@ public class TestAccuracy {
 
         Scanner keyboard = new Scanner(System.in);
         ReinforceLearningAgentConnectFour Agent = new ReinforceLearningAgentConnectFour(connect4Dto);
-        Agent.testAgent(true);
+        Agent.testAgent(1);
 
         System.out.println("Test:Completed");
     }
