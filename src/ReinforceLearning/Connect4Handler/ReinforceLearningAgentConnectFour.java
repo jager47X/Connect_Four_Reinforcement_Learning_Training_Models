@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class  ReinforceLearningAgentConnectFour extends AbstractReinforceLearningAgent2D {
+public class  ReinforceLearningAgentConnectFour  extends AbstractReinforceLearningAgent2D {
     int TotalReward;
 
     public ReinforceLearningAgentConnectFour (Connect4Dto connect4dto) {
