@@ -18,31 +18,23 @@ public abstract class BaseDto {
 
 
     private final int CAPACITY = 42;
-    protected List<String> ImportedData=new ArrayList<>();
     protected List<String> HashedData=new ArrayList<>();
 
-    public List<String> getImportedData() {
-        return ImportedData;
-    }
 
     public List<String> getHashedData() {
         return HashedData;
     }
 
-    public void setHashedData(List<String> hashedData) {
-        HashedData = hashedData;
-    }
-
     protected Board board;
     protected Connect4 game;
 
-    public void setImportedData(List<String> importedData) {
-        ImportedData = importedData;
-    }
 
     public BaseDto(Connect4 game) {
         this.game=game;
         this.board=game.getBoard();
+    }
+    public BaseDto() {
+
     }
 
     public Board getBoard() {
@@ -61,69 +53,22 @@ public abstract class BaseDto {
         this.board = board;
     }
 
-    public void exportCSV() {
-        try (FileWriter writer = new FileWriter(CSV.getPath())) {
 
-            for (int i = 0; i <ImportedData.size() ; i++) {//imported game
-                writer.append(ImportedData.get(i));
-                if(ImportedData.get(i).contains("-1")){
-                    writer.append(",");
-                }else{
-                    writer.append("\n");
-                }
-            }
 
-            for (String hashedLine : HashedData) {//current game
-                writer.append(hashedLine);
-                if(hashedLine.contains("-1")){
-                    writer.append(",");
-                }else{
-                    writer.append("\n");
-                }
-                // Add a newline after each line
-            }
-            System.out.println("CSV exported successfully to"+CSV.getPath()+".");
-        } catch (IOException e) {
-            System.err.println("Error exporting CSV: " + e.getMessage());
-            e.printStackTrace();
+
+    public void addLine(int turn) {
+        while(turn>getHashedData().size()){
+            turn--;
         }
-    }
-
-
-    public void import_CSV() {
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(CSV.getPath()))) {
-            String line;
-            int gameSet=1;
-
-            while ((line = reader.readLine()) != null) {
-                // Process each line as needed
-                System.out.println("Processing a CSV line Game:"+gameSet);
-                gameSet=processCSVLine(line,gameSet);
-
-            }
-
-
-            System.out.println("CSV imported successfully from: " + CSV.getPath());
-        } catch (IOException e) {
-            System.err.println("Error importing CSV: " + e.getMessage());
-            e.printStackTrace();
+        getHashedData().add(turn, hashing());
+        System.out.println("turn: " + turn );
+        System.out.println("Total Size of HashedData: " +getHashedData().size() );
+        System.out.println("Total Line:");
+        for (String Line : getHashedData()) {
+            System.out.println(Line);
         }
 
 
-    }
-
-
-
-    protected int processCSVLine(String line,int gameSet) {
-        gameSet++;
-        String[] data =line.split(",");//game 1 2 3
-        for (int i = 0; i < data.length; i++) {
-            ImportedData.add(i,data[i]);
-        }
-
-        System.out.println(Arrays.toString(data));
-       return  gameSet;
     }
 
     public String hashing() {

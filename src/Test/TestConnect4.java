@@ -1,10 +1,13 @@
 package Test;
 
+import dao.BaseDao;
 import dao.QTableDao;
 import dto.Connect4Dto;
 import dto.QTableDto;
 import target.Connect4;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class TestConnect4 {
@@ -38,18 +41,20 @@ public class TestConnect4 {
                 if (game.winCheck()) {//check winner 1 or 2
                     System.out.println((game.getActivePlayer() == Connect4.PLAYER1) ? "player1 Won!" : "player2 Won!");
                     game.displayBoard();
-                    dao.addLine(turn,dto);
-                    dto.exportCSV();
+                    dto.addLine(turn);
+                    List<String> exportingData = new ArrayList<>(BaseDao.getImportedData());
 
+                    dao.exportCSV(exportingData);
                     break;
                 }else if(game.getWinner()==0){//withdraw
                     System.out.println("Withdraw!");
                     game.displayBoard();
-                    dao.addLine(turn,dto);
-                    dto.exportCSV();
+                    dto.addLine(turn);
+                    List<String> exportingData = new ArrayList<>(BaseDao.getImportedData());
+                    dao.exportCSV(exportingData);
                     break;
-                }else{
-                    dao.addLine(turn,dto);
+                }else{//game keep going
+                    dto.addLine(turn);
                 }
 
 

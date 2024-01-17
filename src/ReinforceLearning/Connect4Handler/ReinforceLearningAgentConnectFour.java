@@ -23,65 +23,21 @@ public class  ReinforceLearningAgentConnectFour  extends AbstractReinforceLearni
         TotalReward=0;
     }
     @Override
-    public void trainAgent() {//use multi-thread //if epsodes=1 then vs human if not ai vs ai
+    public QTableDto trainAgent() {//use multi-thread //if epsodes=1 then vs human if not ai vs ai
 
-        QTableDto qTableDto=new QTableDto(Environment);
-        //  for (int i = 0; i <episodes ; i++) {//set how many times to play
-        Environment.setActivePlayer(Connect4.PLAYER2);
-        Environment.setTurn(0);
-        loadQTableFromCSV(QTable);
-        //USE AI
-        resetBoard(Environment);
-        do {
-            if(isGameOver(Environment)){
-                Environment.setWinner(0);
-                saveQTableToCSV(qTableDto);
-                break;
-            }
-            //update environment/state
-            Environment = connect4Dto.getGame();
-
-            if (Environment.getActivePlayer() == Connect4.PLAYER1) {//switch player
-                Environment.setActivePlayer(Connect4.PLAYER2);
-                Environment.setNonActivePlayer(Connect4.PLAYER1);
-            } else {
-                Environment.setActivePlayer(Connect4.PLAYER1);
-                Environment.setNonActivePlayer(Connect4.PLAYER2);
-            }
-                   while(!Environment.playerDrop(RuleBasedAI.makeMove(Environment.getBoard(),Environment.getActivePlayer(),Environment.getNonActivePlayer()))) {//update move
-                       Environment.playerDrop(RuleBasedAI.makeMove(Environment.getBoard(),Environment.getActivePlayer(),Environment.getNonActivePlayer()));
-                    }
-            // calculateReward(board.getGame(),);
-            if (Environment.winCheck()) {//check winner 1 or 2
-                QTable.addLine(Environment.getTurn(),qTableDto);
-                saveQTableToCSV(qTableDto);
-                break;
-            }else if(Environment.getWinner()==0){//withdraw
-                QTable.addLine(Environment.getTurn(),qTableDto);
-                saveQTableToCSV(qTableDto);
-                break;
-            }else{
-                QTable.addLine(Environment.getTurn(),qTableDto);
-            }
-        }while(!isGameOver(Environment));
-
-    }
-
-    @Override
-    public void testAgent() {//use multi-thread //if epsodes=1 then vs human if not ai vs ai
 
         QTableDto qTableDto=new QTableDto(Environment);
         Scanner keyboard = new Scanner(System.in);
         //  for (int i = 0; i <episodes ; i++) {//set how many times to play
         Environment.setActivePlayer(Connect4.PLAYER2);
         Environment.setTurn(0);
-        loadQTableFromCSV(QTable);
+        setQTable(QTable);
+
         //USE AI
         resetBoard(Environment);
         do {
             if(isGameOver(Environment)){
                 Environment.setWinner(0);
-                saveQTableToCSV(qTableDto);
                 break;
             }
             //update environment/state
@@ -98,34 +54,33 @@ public class  ReinforceLearningAgentConnectFour  extends AbstractReinforceLearni
                 Environment.playerDrop(RuleBasedAI.makeMove(Environment.getBoard(),Environment.getActivePlayer(),Environment.getNonActivePlayer()));
             }
             // calculateReward(board.getGame(),);
-            if (Environment.winCheck()) {//check winner 1 or 2
-                QTable.addLine(Environment.getTurn(),qTableDto);
-                saveQTableToCSV(qTableDto);
-                break;
-            }else if(Environment.getWinner()==0){//withdraw
-                QTable.addLine(Environment.getTurn(),qTableDto);
-                saveQTableToCSV(qTableDto);
+            if (Environment.winCheck()||Environment.getWinner()==0) {//check winner 1 or 2
+                qTableDto.addLine(Environment.getTurn());
                 break;
             }else{
-                QTable.addLine(Environment.getTurn(),qTableDto);
+                qTableDto.addLine(Environment.getTurn());
             }
         }while(!isGameOver(Environment));
 
 
+return qTableDto;
     }
+
     @Override
-    public void trainAgent(int episodes) {
+    public QTableDto testAgent() {//use multi-thread //if epsodes=1 then vs human if not ai vs ai
+
         QTableDto qTableDto=new QTableDto(Environment);
+        Scanner keyboard = new Scanner(System.in);
         //  for (int i = 0; i <episodes ; i++) {//set how many times to play
         Environment.setActivePlayer(Connect4.PLAYER2);
         Environment.setTurn(0);
-        loadQTableFromCSV(QTable);
+        setQTable(QTable);
+
         //USE AI
         resetBoard(Environment);
         do {
             if(isGameOver(Environment)){
                 Environment.setWinner(0);
-                saveQTableToCSV(qTableDto);
                 break;
             }
             //update environment/state
@@ -142,83 +97,18 @@ public class  ReinforceLearningAgentConnectFour  extends AbstractReinforceLearni
                 Environment.playerDrop(RuleBasedAI.makeMove(Environment.getBoard(),Environment.getActivePlayer(),Environment.getNonActivePlayer()));
             }
             // calculateReward(board.getGame(),);
-            if (Environment.winCheck()) {//check winner 1 or 2
-                QTable.addLine(Environment.getTurn(),qTableDto);
-                saveQTableToCSV(qTableDto);
+            if (Environment.winCheck()||Environment.getWinner()==0) {//check winner 1 or 2
+                qTableDto.addLine(Environment.getTurn());
                 break;
-            }else if(Environment.getWinner()==0){//withdraw
-                QTable.addLine(Environment.getTurn(),qTableDto);
-                saveQTableToCSV(qTableDto);
-                break;
-            }else{
-                QTable.addLine(Environment.getTurn(),qTableDto);
+           }else{
+                qTableDto.addLine(Environment.getTurn());
             }
         }while(!isGameOver(Environment));
 
-
-
-
+return qTableDto;
     }
-   // }
 
-  
-    @Override
-    public void testAgent(int episode) {//self learning or with player //use multi-thread
 
-        QTableDto qTableDto=new QTableDto(Environment);
-        Scanner keyboard = new Scanner(System.in);
-            Environment.setActivePlayer(Connect4.PLAYER2);
-            Environment.setTurn(0);
-            loadQTableFromCSV(QTable);
-            //USE AI
-            resetBoard(Environment);
-            do {
-                //update environment/state
-                Environment = connect4Dto.getGame();
-                printBoard(Environment);
-                if (Environment.getActivePlayer() == Connect4.PLAYER1) {//switch player
-                    Environment.setActivePlayer(Connect4.PLAYER2);
-                    Environment.setNonActivePlayer(Connect4.PLAYER1);
-                } else {
-                    Environment.setActivePlayer(Connect4.PLAYER1);
-                    Environment.setNonActivePlayer(Connect4.PLAYER2);
-                }
-                if(Environment.getActivePlayer() ==Connect4.PLAYER1){//player move
-                    if(episode==0){
-                        //human drop
-                        Environment.playerDrop(keyboard.nextInt());
-                    }else{// AI move
-                        while(!Environment.playerDrop(selectAction())){
-                            Environment.playerDrop(selectAction());
-                        }
-                    }
-                }else{//AI move
-                    while(!Environment.playerDrop(selectAction())){
-                        Environment.playerDrop(selectAction());
-                    }
-                }
-
-                // calculateReward(board.getGame(),);
-                if (Environment.winCheck()) {//check winner 1 or 2
-                    System.out.println((Environment.getActivePlayer() == Connect4.PLAYER1) ? "player1 Won!" : "player2 Won!");
-                    QTable.addLine(Environment.getTurn(),qTableDto);
-                    printBoard(Environment);
-                    saveQTableToCSV(qTableDto);
-                    break;
-                }else if(Environment.getWinner()==0){//withdraw
-                    System.out.println("Withdraw!");
-                    QTable.addLine(Environment.getTurn(),qTableDto);
-                    printBoard(Environment);
-                    saveQTableToCSV(qTableDto);
-                    break;
-                }else{
-                    QTable.addLine(Environment.getTurn(),qTableDto);
-                }
-            }while(!isGameOver(Environment));
-        printBoard(Environment);
-        }
-
-    //}
 
 
     public void resetBoard(Connect4 game) {
@@ -334,15 +224,7 @@ public class  ReinforceLearningAgentConnectFour  extends AbstractReinforceLearni
         return super.selectAction();
     }
 
-    @Override
-    public void saveQTableToCSV(QTableDto dto) {
-    dto.exportCSV();
-    }
 
-    @Override
-    public void loadQTableFromCSV(QTableDao dao) {
-        setQTable(dao);
-    }
 
 
     // Additional Connect Four-specific methods and logic go here

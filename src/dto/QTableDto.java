@@ -1,5 +1,6 @@
 package dto;
 
+import dao.BaseDao;
 import target.Connect4;
 
 import java.util.Map;
@@ -13,14 +14,16 @@ public class QTableDto extends BaseDto{
 
     public QTableDto(Connect4 game) {//CSV to dto
         super(game);
-        import_CSV();
         initializeMap();
+    }
+    public QTableDto() {//CSV to dto
+
     }
 
 
     private void initializeMap(){
-        for (String data : ImportedData) {
-            int[] values = new int[ImportedData.size()];
+        for (String data : BaseDao.getImportedData()) {
+            int[] values = new int[BaseDao.getImportedData().size()];
             table.put(data, values);
         }
     }

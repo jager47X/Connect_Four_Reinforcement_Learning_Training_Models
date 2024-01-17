@@ -9,19 +9,14 @@ import target.Connect4;
 import java.util.Random;
 
 interface ReinforceLearningAgent2D{
-    void trainAgent(int episode);
-    void testAgent(int episode);
-    void trainAgent();
-    void testAgent();
+    QTableDto trainAgent();
+    QTableDto testAgent();
     boolean makeMove(int action);
     void calculateReward(Board board, int row, int col, char activePlayer);
     int[] getLegalActions();
     String stateToIndex(Connect4Dto state);
     int selectAction();
 
-
-    void saveQTableToCSV(QTableDto dto);//connect4 dto
-    void loadQTableFromCSV(QTableDao dao);//connect4 dto
 
 
 }
