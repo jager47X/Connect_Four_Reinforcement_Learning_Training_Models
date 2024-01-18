@@ -1,13 +1,7 @@
 package Test;
 
-import dao.BaseDao;
-import dao.QTableDao;
-import dto.Connect4Dto;
-import dto.QTableDto;
 import target.Connect4;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class TestConnect4 {
@@ -19,8 +13,7 @@ public class TestConnect4 {
             Connect4 game = new Connect4();
             Scanner keyboard = new Scanner(System.in);
             game.setActivePlayer(Connect4.PLAYER2);
-            QTableDao dao=QTableDao.getInstance();
-            QTableDto dto= new QTableDto(game);
+
             do {
                 game.setActivePlayer((game.getActivePlayer() == Connect4.PLAYER2) ? Connect4.PLAYER1 : Connect4.PLAYER2);
                 turn++;
@@ -41,23 +34,18 @@ public class TestConnect4 {
                 if (game.winCheck()) {//check winner 1 or 2
                     System.out.println((game.getActivePlayer() == Connect4.PLAYER1) ? "player1 Won!" : "player2 Won!");
                     game.displayBoard();
-                    dto.addLine(turn);
-                    List<String> exportingData = new ArrayList<>(BaseDao.getImportedData());
-
-                    dao.exportCSV(exportingData);
+                    System.out.println("total reward player1:"+game.getTotalRewardP1());
+                    System.out.println("total reward player2:"+game.getTotalRewardP2());
                     break;
                 }else if(game.getWinner()==0){//withdraw
                     System.out.println("Withdraw!");
                     game.displayBoard();
-                    dto.addLine(turn);
-                    List<String> exportingData = new ArrayList<>(BaseDao.getImportedData());
-                    dao.exportCSV(exportingData);
+                    System.out.println("total reward player1:"+game.getTotalRewardP1());
+                    System.out.println("total reward player2:"+game.getTotalRewardP2());
                     break;
-                }else{//game keep going
-                    dto.addLine(turn);
                 }
-
-
+                System.out.println("total reward player1:"+game.getTotalRewardP1());
+                System.out.println("total reward player2:"+game.getTotalRewardP2());
             } while (game.isEmpty());
 
             keyboard.close();

@@ -18,12 +18,12 @@ public class RuleBasedAI extends Connect4{
     private static int findAvailableRow(Board board, int column) {
         for (int row = ROWS_SIZE- 1; row >= 0; row--) {
             if (board.getTile(row,column).getValue() == EMPTY) {
-                System.out.println("AI found Available: row:"+",column"+column);
+           //     System.out.println("AI found Available: row:"+",column"+column);
                 return row;
             }
-            System.out.println("AI found Not Available: row:"+row+",column:"+column);
+        //    System.out.println("AI found Not Available: row:"+row+",column:"+column);
         }
-        System.out.println("AI did not found Available column at "+ column );
+     //   System.out.println("AI did not found Available column at "+ column );
         return -1;  // Column is full
     }// end of findAvailableRow
 
@@ -31,26 +31,26 @@ public class RuleBasedAI extends Connect4{
     public static int makeMove(Board board,char activePlayer,char opponent) {
         //pus 1 to return to fit the selction 1-7 instead of 0-6
         // Rule 1: Check if there's a winning move
-        System.out.println("Checking Rule 1");
+       // System.out.println("Checking Rule 1");
         winChoice=isWinningMove(board,activePlayer);
         if (winChoice!=-1){
             return ++winChoice;
         }
         // Rule 2: Block the opponent from winning
-        System.out.println("Checking Rule 2");
+       // System.out.println("Checking Rule 2");
         winChoice=isWinningMove(board,opponent);
         if (winChoice!=-1){
             return ++winChoice;
         }
         // Rule 3: Randomly choose an available column
-        System.out.println("Processing Rule 3");
+      //  System.out.println("Processing Rule 3");
         Random random = new Random();
         int randomCol;
         do {
             randomCol = random.nextInt(COLS_SIZE);
         } while (!isValidMove(board, randomCol));
 
-        System.out.println("Rule 3: Randomly choose an available column");
+     //   System.out.println("Rule 3: Randomly choose an available column");
         return  ++randomCol;
     }
 
@@ -67,7 +67,7 @@ public class RuleBasedAI extends Connect4{
                         board.getTile(row, column + 3).getValue() == activePlayer
                 ) {
 
-                    System.out.println("horizon win FOUND: row:" + row + ",colum:" + column);
+            //        System.out.println("horizon win FOUND: row:" + row + ",colum:" + column);
                     return column;
                 }
                 //1.3
@@ -77,7 +77,7 @@ public class RuleBasedAI extends Connect4{
                         board.getTile(row, column + 3).getValue() == activePlayer
                 ) {
                     column += 1;
-                    System.out.println("horizon win FOUND: row:" + row + ",colum:" + column);
+           //         System.out.println("horizon win FOUND: row:" + row + ",colum:" + column);
                     return column;
                 }
                 //2.2
@@ -87,7 +87,7 @@ public class RuleBasedAI extends Connect4{
                         board.getTile(row, column + 3).getValue() == activePlayer
                 ) {
                     column += 2;
-                    System.out.println("horizon win FOUND: row:" + row + ",colum:" + column);
+          //          System.out.println("horizon win FOUND: row:" + row + ",colum:" + column);
                     return column;
                 }
                 //3.1
@@ -97,12 +97,12 @@ public class RuleBasedAI extends Connect4{
                         board.getTile(row, column + 3).getValue() == EMPTY
                 ) {
                     column += 3;
-                    System.out.println("horizon win FOUND: row:" + row + ",colum:" + column);
+          //          System.out.println("horizon win FOUND: row:" + row + ",colum:" + column);
                     return column;
                 }
             }
         }
-        System.out.println("horizon win NOT found");
+  //      System.out.println("horizon win NOT found");
 
 
 
@@ -116,13 +116,13 @@ public class RuleBasedAI extends Connect4{
                         board.getTile(row + 2, column).getValue() == activePlayer &&
                         board.getTile(row + 3, column).getValue() == activePlayer
                 ) {
-                    System.out.println("vertical win FOUND: row:" + row + ",colum:" + column);
+       //             System.out.println("vertical win FOUND: row:" + row + ",colum:" + column);
                     return column;
                 }
             }
 
         }
-        System.out.println("vertical win NOT found");
+ //       System.out.println("vertical win NOT found");
 
 
 
@@ -138,7 +138,7 @@ public class RuleBasedAI extends Connect4{
                         board.getTile(row + 3, column+3).getValue() == activePlayer
                 ) {
 
-                    System.out.println("diagonal wins (left to right)win FOUND: row:" + row + ",colum:" + column);
+          //          System.out.println("diagonal wins (left to right)win FOUND: row:" + row + ",colum:" + column);
 
                     return column;
                 }
@@ -151,7 +151,7 @@ public class RuleBasedAI extends Connect4{
                         board.getTile(row + 3, column+3).getValue() == activePlayer
                 ) {
                     column += 1;
-                    System.out.println("diagonal wins (left to right)win FOUND: row:" + row + ",colum:" + column);
+          //          System.out.println("diagonal wins (left to right)win FOUND: row:" + row + ",colum:" + column);
 
                     return column;
                 }
@@ -164,7 +164,7 @@ public class RuleBasedAI extends Connect4{
                         board.getTile(row + 3, column+3).getValue() == activePlayer
                 ) {
                     column += 2;
-                    System.out.println("diagonal wins (left to right)win FOUND: row:" + row + ",colum:" + column);
+           //         System.out.println("diagonal wins (left to right)win FOUND: row:" + row + ",colum:" + column);
 
                     return column;
                 }
@@ -177,13 +177,13 @@ public class RuleBasedAI extends Connect4{
                         board.getTile(row + 3, column+3).getValue() == EMPTY
                 ) {
                     column += 3;
-                    System.out.println("diagonal wins (left to right)win FOUND: row:" + row + ",colum:" + column);
+            //        System.out.println("diagonal wins (left to right)win FOUND: row:" + row + ",colum:" + column);
 
                     return column;
                 }
             }
         }
-        System.out.println("diagonal wins (left to right)NOT found");
+   //     System.out.println("diagonal wins (left to right)NOT found");
         // Check for diagonal wins (right to left)
         for (int row = 0; row < ROWS_SIZE-4; row++) {
             for (int column = 3; column < COLS_SIZE; column++) {
@@ -194,7 +194,7 @@ public class RuleBasedAI extends Connect4{
                         board.getTile(row + 3, column-3).getValue() == activePlayer
                 ) {
 
-                    System.out.println("diagonal wins (right to left) win FOUND: row:" + row + ",colum:" + column);
+         //           System.out.println("diagonal wins (right to left) win FOUND: row:" + row + ",colum:" + column);
 
                     return column;
                 }
@@ -204,7 +204,7 @@ public class RuleBasedAI extends Connect4{
                         board.getTile(row + 3, column-3).getValue() == activePlayer
                 ) {
                     column-=1;
-                    System.out.println("diagonal wins (right to left) win FOUND: row:" + row + ",colum:" + column);
+         //           System.out.println("diagonal wins (right to left) win FOUND: row:" + row + ",colum:" + column);
 
                     return column;
                 }
@@ -214,7 +214,7 @@ public class RuleBasedAI extends Connect4{
                         board.getTile(row + 3, column-3).getValue() ==  activePlayer
                 ) {
                     column-=2;
-                    System.out.println("diagonal wins (right to left) win FOUND: row:" + row + ",colum:" + column);
+           //         System.out.println("diagonal wins (right to left) win FOUND: row:" + row + ",colum:" + column);
 
                     return column;
                 }
@@ -224,14 +224,14 @@ public class RuleBasedAI extends Connect4{
                         board.getTile(row + 3, column-3).getValue() == EMPTY
                 ) {
                     column-=3;
-                    System.out.println("diagonal wins (right to left) win FOUND: row:" + row + ",colum:" + column);
+           //        System.out.println("diagonal wins (right to left) win FOUND: row:" + row + ",colum:" + column);
 
                     return column;
                 }
             }
 
         }
-        System.out.println("Win-check NOT found");
+  //      System.out.println("Win-check NOT found");
         return -1;
     }//end of isWinningMove
 }

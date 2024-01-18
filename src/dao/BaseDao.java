@@ -2,7 +2,6 @@ package dao;
 
 
 import dto.BaseDto;
-import dto.QTableDto;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -14,10 +13,9 @@ import java.util.List;
 
 public abstract class BaseDao <T extends BaseDto> {
 
-        public BaseDao( ) {
-        }
 
-    protected static List<String> ImportedData=new ArrayList<>();
+
+    protected static List<String> ImportedData=new ArrayList<>(1000);
 
     public static List<String> getImportedData() {
         if(ImportedData==null){
@@ -29,20 +27,21 @@ public abstract class BaseDao <T extends BaseDto> {
 
     public void import_CSV() {
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(CSV.getPath()))) {
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(CSV.getFile()))) {
             String line;
             int gameSet=1;
 
             while ((line = reader.readLine()) != null) {
                 // Process each line as needed
-                System.out.println("Processing a CSV line Game:"+gameSet);
+          //      System.out.println("Processing a CSV line Game:"+gameSet);
                 gameSet=processCSVLine(line,gameSet);
             }
 
 
-            System.out.println("CSV imported successfully from: " + CSV.getPath());
+            System.out.println("SUCCESS : IMPORTING" + CSV.getFile());
         } catch (IOException e) {
-            System.err.println("Error importing CSV: " + e.getMessage());
+            System.err.println("ERROR : " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -50,7 +49,7 @@ public abstract class BaseDao <T extends BaseDto> {
     }
 
     public void exportCSV(List<String>  HashedData) {
-        try (FileWriter writer = new FileWriter(CSV.getPath())) {
+        try (FileWriter writer = new FileWriter(CSV.getFile())) {
 
             for (String hashedLine :  HashedData) {//current game
                 writer.append(hashedLine);
@@ -61,9 +60,9 @@ public abstract class BaseDao <T extends BaseDto> {
                 }
                 // Add a newline after each line
             }
-            System.out.println("CSV exported successfully to"+CSV.getPath()+".");
+            System.out.println("SUCCESS : EXPORTING"+CSV.getFile()+".");
         } catch (IOException e) {
-            System.err.println("Error exporting CSV: " + e.getMessage());
+            System.err.println("ERROR : " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -75,7 +74,7 @@ public abstract class BaseDao <T extends BaseDto> {
             ImportedData.add(i,data[i]);
         }
 
-        System.out.println(Arrays.toString(data));
+      //  System.out.println(Arrays.toString(data));
         return  gameSet;
     }
 

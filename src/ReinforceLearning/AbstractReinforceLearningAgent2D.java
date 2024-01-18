@@ -3,16 +3,14 @@ package ReinforceLearning;
 import dao.QTableDao;
 import dto.Connect4Dto;
 import dto.QTableDto;
-import target.Board;
 import target.Connect4;
 
 import java.util.Random;
 
 interface ReinforceLearningAgent2D{
-    QTableDto trainAgent();
-    QTableDto testAgent();
+    QTableDto SupervisedLeanrning();
+    QTableDto ReinforceLearning();
     boolean makeMove(int action);
-    void calculateReward(Board board, int row, int col, char activePlayer);
     int[] getLegalActions();
     String stateToIndex(Connect4Dto state);
     int selectAction();
@@ -46,6 +44,7 @@ public abstract class AbstractReinforceLearningAgent2D implements ReinforceLearn
     }
 
     protected AbstractReinforceLearningAgent2D(Connect4Dto connect4Dto) {
+
         ROWS=connect4Dto.getGame().getROWS_SIZE();
         COLS=connect4Dto.getGame().getCOLS_SIZE();
         ACTIONS=connect4Dto.getGame().getCOLS_SIZE();
@@ -75,15 +74,17 @@ public abstract class AbstractReinforceLearningAgent2D implements ReinforceLearn
             // Exploitation: choose the action with the highest Q-value
             Connect4Dto dto=new Connect4Dto(Environment);
             String stateIndex = stateToIndex(dto);// converting the current state of the environment into an index
-
-            int[] qValues = QTable.get(stateIndex);//retrieving the Q-values associated with the current state from the Q-table.
-            int[] legalActions = getLegalActions();//place chip by AI on the available columns
+            Integer[] qValues=new Integer[QTable.getSize()];
+            for (int i=0;i<QTable.getSize();i++){
+                qValues[i]=QTable.get(stateIndex);//retrieving the Q-values associated with the current state from the Q-table.
+            }
+                  int[] legalActions = getLegalActions();//place chip by AI on the available columns
 
             return findBestAction(legalActions,qValues);//find the best action and return it
         }
     }
 
-    private int findBestAction(int[] legalActions, int[] qValues){
+    private int findBestAction(int[] legalActions, Integer[] qValues){
         int bestAction = legalActions[0];//initialize bestAction by taking the head of legalAction
         double bestQValue = qValues[bestAction];
 
@@ -95,7 +96,6 @@ public abstract class AbstractReinforceLearningAgent2D implements ReinforceLearn
         }
         return bestAction;
     }
-
 
 
 }

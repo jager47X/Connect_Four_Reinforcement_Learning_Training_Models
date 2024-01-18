@@ -13,6 +13,8 @@ public class Connect4{
         private  Board board;
         private int turn;
         private int winner;
+        private int totalRewardP1;
+        private int totalRewardP2;
         private int location;
 
     public Board getBoard() {
@@ -40,6 +42,8 @@ public class Connect4{
         this.activePlayer = PLAYER1;
         this.turn=0;
         this.winner=-1;
+        this.totalRewardP1 =0;
+        this.totalRewardP2 =0;
         this.board = new Board(COLS_SIZE, ROWS_SIZE,EMPTY,PLAYER1,PLAYER2);
     }
 
@@ -77,15 +81,16 @@ public class Connect4{
                     if (board.getTile(row,column_selection).getValue() == EMPTY) {
                         setLocation(row,column_selection);
 
-                        System.out.println("selection:"+selection);
-                        System.out.println("location:"+location+" = col_size:7 *row:"+row+" +col:"+column_selection);
+                  //      System.out.println("selection:"+selection);
+                  //      System.out.println("location:"+location+" = col_size:7 *row:"+row+" +col:"+column_selection);
                         board.getTile(row,column_selection).setValue(activePlayer);
                         turn++;
+                        calculateReward(getActivePlayer());
                         return true;
                     }
                 }
             } else {
-                System.out.println("(!) Invalid Selection");
+        //        System.out.println("(!) Invalid Selection");
             }
 
             return false;
@@ -103,6 +108,21 @@ public class Connect4{
             return column >= 0 && column < COLS_SIZE &&board.getTile(0,column).getValue() == EMPTY;
         }
 
+    public int getTotalRewardP1() {
+        return totalRewardP1;
+    }
+
+    public void setTotalRewardP1(int totalRewardP1) {
+        this.totalRewardP1 = totalRewardP1;
+    }
+
+    public int getTotalRewardP2() {
+        return totalRewardP2;
+    }
+
+    public void setTotalRewardP2(int totalRewardP2) {
+        this.totalRewardP2 = totalRewardP2;
+    }
 
     public int getLocation() {
         return location;
@@ -110,6 +130,101 @@ public class Connect4{
 
     public void setLocation(int column,int row) {
         this.location = COLS_SIZE*row+column;
+    }
+    private void calculateReward(char activePlayer) {
+        int totalConnection=0;
+        int baseNumber=2;
+        int connection = -1;
+
+        for (int row = 0; row < ROWS_SIZE; row++) {
+            for (int column = 0; column <= COLS_SIZE - 4; column++) {
+                // Check if within array bounds
+                if (board.getTile(row,column ).getValue() == activePlayer ){
+                    connection++;
+                    if( board.getTile( row,column + 1).getValue() == activePlayer ){
+                        connection++;
+                        if(board.getTile( row,column + 2).getValue() == activePlayer){
+                            connection++;
+                            if(board.getTile(row,column + 3).getValue() == activePlayer){
+                                connection++;
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+
+        totalConnection += (int) Math.pow(baseNumber,connection);
+        connection = -1;
+        for (int row = 0; row <= ROWS_SIZE - 4; row++) {
+            for (int column = 0; column < COLS_SIZE; column++) {
+                // Check if within array bounds
+                if (board.getTile(row,column).getValue() == activePlayer ){
+                    connection++;
+                    if( board.getTile( row+1,column ).getValue() == activePlayer ){
+                        connection++;
+                        if(board.getTile( row+2,column ).getValue() == activePlayer){
+                            connection++;
+                            if(board.getTile(row+3,column ).getValue() == activePlayer){
+                                connection++;
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+        totalConnection += (int) Math.pow(baseNumber,connection);
+        connection = -1;
+        for (int row = 0; row <= ROWS_SIZE- 4; row++) {
+            for (int column = 0; column <= COLS_SIZE - 4; column++) {
+                // Check if within array bounds
+                if (board.getTile(row,column ).getValue() == activePlayer ){
+                    connection++;
+                    if( board.getTile( row+1,column + 1).getValue() == activePlayer ){
+                        connection++;
+                        if(board.getTile( row+2,column + 2).getValue() == activePlayer){
+                            connection++;
+                            if(board.getTile(row+3,column + 3).getValue() == activePlayer){
+                                connection++;
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+        totalConnection += (int) Math.pow(baseNumber,connection);
+        connection = 0;
+        for (int row = 0; row < ROWS_SIZE- 4; row++) {
+            for (int column = 3; column <= COLS_SIZE - 4; column++) {
+                // Check if within array bounds
+                if (board.getTile(row,column ).getValue() == activePlayer ){
+                    connection++;
+                    if( board.getTile( row+1,column - 1).getValue() == activePlayer ){
+                        connection++;
+                        if(board.getTile( row+2,column - 2).getValue() == activePlayer){
+                            connection++;
+                            if(board.getTile(row+3,column-3).getValue() == activePlayer){
+                                connection++;
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+        totalConnection += (int) Math.pow(baseNumber,connection);
+
+
+        if(activePlayer==PLAYER1){
+           this.totalRewardP1 =totalConnection;
+        }else{
+            this.totalRewardP2 =totalConnection;
+        }
+
+
     }
 
 
