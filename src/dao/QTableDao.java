@@ -2,10 +2,7 @@ package dao;
 
 import dto.QTableDto;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,8 +16,8 @@ public class QTableDao extends BaseDao<QTableDto> {
     int reward ;
 
     private QTableDao() {
-        super(); // Import QTable from CSV
-        import_CSV();
+        super();
+        import_CSV();// Import QTable from CSV
         initializeMap();
     }
 
@@ -84,6 +81,9 @@ public class QTableDao extends BaseDao<QTableDto> {
 
 
     public QEntry getQvalue(String state) {
+        if(Objects.equals(state, "")){
+            //insert the first move
+        }
         QEntry qEntry = table.get(state);
         if (qEntry != null) {
             return qEntry;
