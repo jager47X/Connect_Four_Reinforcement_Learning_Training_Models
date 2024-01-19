@@ -29,7 +29,7 @@ public class TestConnect4 {
                             break;
                         }
                     } while (true);
-                }//chip is set
+                }// chip is set
 
                 if (game.winCheck()) {//check winner 1 or 2
                     System.out.println((game.getActivePlayer() == Connect4.PLAYER1) ? "player1 Won!" : "player2 Won!");

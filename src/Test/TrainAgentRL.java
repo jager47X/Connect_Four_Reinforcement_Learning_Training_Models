@@ -69,7 +69,7 @@ public class TrainAgentRL implements Callable<List<String>> {
         final int nTrain=200;
         final int nLoop=nTrain/episodes;
         QTableDao qTableDao = QTableDao.getInstance();
-        qTableDao.import_CSV();
+
         List<String> exportingData = new ArrayList<>();
         if(!BaseDao.getImportedData().isEmpty()){
             exportingData.addAll(BaseDao.getImportedData());

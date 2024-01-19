@@ -7,8 +7,8 @@ import target.Connect4;
 import target.RuleBasedAI;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 
 
 public class  ReinforceLearningAgentConnectFour  extends AbstractReinforceLearningAgent2D {
@@ -23,8 +23,6 @@ public class  ReinforceLearningAgentConnectFour  extends AbstractReinforceLearni
 
 
         QTableDto qTableDto=new QTableDto(Environment);
-        Scanner keyboard = new Scanner(System.in);
-        //  for (int i = 0; i <episodes ; i++) {//set how many times to play
         Environment.setActivePlayer(Connect4.PLAYER2);
         Environment.setTurn(0);
         setQTable(QTable);
@@ -51,10 +49,10 @@ public class  ReinforceLearningAgentConnectFour  extends AbstractReinforceLearni
             }
             // calculateReward(board.getGame(),);
             if (Environment.winCheck()||Environment.getWinner()==0) {//check winner 1 or 2
-                qTableDto.addLine(Environment.getTurn());
+                qTableDto.addLine(Environment.getCurrentTurn());
                 break;
             }else{
-                qTableDto.addLine(Environment.getTurn());
+                qTableDto.addLine(Environment.getCurrentTurn());
             }
         }while(!isGameOver(Environment));
 
@@ -66,10 +64,9 @@ return qTableDto;
     public QTableDto ReinforceLearning() {//use multi-thread //if epsodes=1 then vs human if not ai vs ai
 
         QTableDto qTableDto=new QTableDto(Environment);
-        Scanner keyboard = new Scanner(System.in);
-        //  for (int i = 0; i <episodes ; i++) {//set how many times to play
         Environment.setActivePlayer(Connect4.PLAYER2);
         Environment.setTurn(0);
+
         setQTable(QTable);
 
         //USE AI
@@ -81,20 +78,25 @@ return qTableDto;
             }
             //update environment/state
             Environment = connect4Dto.getGame();
-
+            System.out.print("Player");
             if (Environment.getActivePlayer() == Connect4.PLAYER1) {//switch player
                 Environment.setActivePlayer(Connect4.PLAYER2);
                 Environment.setNonActivePlayer(Connect4.PLAYER1);
+                System.out.println("1's turn");
             } else {
                 Environment.setActivePlayer(Connect4.PLAYER1);
                 Environment.setNonActivePlayer(Connect4.PLAYER2);
+                System.out.println("2's turn");
             }
-            Environment.playerDrop(selectAction());
+
+
+            Environment.playerDrop(selectAction()+1);
+            Environment.displayBoard();
             if (Environment.winCheck()||Environment.getWinner()==0) {//check winner 1 or 2
-                qTableDto.addLine(Environment.getTurn());
+                qTableDto.addLine(Environment.getCurrentTurn());
                 break;
            }else{
-                qTableDto.addLine(Environment.getTurn());
+                qTableDto.addLine(Environment.getCurrentTurn());
             }
         }while(!isGameOver(Environment));
 
@@ -102,18 +104,9 @@ return qTableDto;
     }
 
 
-
-
     public void resetBoard(Connect4 game) {
         game.resetBoard();
     }
-
-
-    @Override
-    public boolean makeMove(int action) {
-        return  Environment.playerDrop(action);
-    }
-
 
 
     private boolean isGameOver(Connect4 game) {
@@ -121,12 +114,8 @@ return qTableDto;
     }
 
 
-    private void printBoard(Connect4 game) {
-        game.displayBoard();
-    }
-
     @Override
-    public int[] getLegalActions() {
+    public int[] getLegalActions() {//not =-6
         List<Integer> legalActionsList = new ArrayList<>();
 // Iterate over each column to check if it's a legal action
             for (int col = 0; col < Environment.getCOLS_SIZE(); col++) {
@@ -140,19 +129,24 @@ return qTableDto;
         for (int i = 0; i < legalActions.length; i++) {
             legalActions[i] = legalActionsList.get(i);
         }
-
-
+        System.out.println("legal action:"+ Arrays.toString(legalActions));
         return legalActions;
     }
 
     @Override
-    public String stateToIndex(Connect4Dto state) {
-         String gameStatus=state.toIndex();
-         //split reward
-         String[] parsed=gameStatus.split("R");
-        System.out.println("stateIndex:"+parsed);
-         TotalReward= Integer.parseInt(parsed[1]);
-        return parsed[0];
+    public String stateToIndex(Connect4Dto dto) {
+       int turn= dto.getGame().getCurrentTurn();
+        StringBuilder state = new StringBuilder( );
+          for (int i = 0; i < turn; i++) {//add up all action
+              if (i % 2==0) {
+                  state.append(1);
+              }else{
+                  state.append(2);
+              }
+            state.append(dto.getGame().getLocation(i));
+        }
+        System.out.println("Current state:"+state);
+          return state.toString();
     }
 
 

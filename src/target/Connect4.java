@@ -1,5 +1,8 @@
 package target;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Connect4{
         protected static final int COLS_SIZE = 7;
         protected static final int ROWS_SIZE = 6;
@@ -9,14 +12,13 @@ public class Connect4{
     private static final int SIZE_OF_BOARD=COLS_SIZE*ROWS_SIZE;
         private char activePlayer;
         private char nonActivePlayer;
-
         private  Board board;
         private int turn;
         private int winner;
         private int totalRewardP1;
         private int totalRewardP2;
-        private int location;
-
+        private List<Integer> location;
+        int totalConnection;
     public Board getBoard() {
         return board;
     }
@@ -44,10 +46,12 @@ public class Connect4{
         this.winner=-1;
         this.totalRewardP1 =0;
         this.totalRewardP2 =0;
+        this.totalConnection=-1;
         this.board = new Board(COLS_SIZE, ROWS_SIZE,EMPTY,PLAYER1,PLAYER2);
+        location=new ArrayList<>();
     }
 
-    public int getTurn() {
+    public int getCurrentTurn() {
         return turn;
     }
 
@@ -79,8 +83,7 @@ public class Connect4{
                 for (int row = ROWS_SIZE - 1; row >= 0; row--) {
 
                     if (board.getTile(row,column_selection).getValue() == EMPTY) {
-                        setLocation(row,column_selection);
-
+                        setLocation(column_selection);
                   //      System.out.println("selection:"+selection);
                   //      System.out.println("location:"+location+" = col_size:7 *row:"+row+" +col:"+column_selection);
                         board.getTile(row,column_selection).setValue(activePlayer);
@@ -124,108 +127,86 @@ public class Connect4{
         this.totalRewardP2 = totalRewardP2;
     }
 
-    public int getLocation() {
-        return location;
+    public int getLocation(int index) {
+        if(index>location.size()){
+            return -1;
+        }
+        return location.get(index);
     }
 
-    public void setLocation(int column,int row) {
-        this.location = COLS_SIZE*row+column;
+    public void setLocation(int column) {
+        this.location.add(column);
     }
     private void calculateReward(char activePlayer) {
-        int totalConnection=0;
-        int baseNumber=2;
-        int connection = -1;
+        final int baseNumber = 4;
+        int maxConnection = 0;
 
-        for (int row = 0; row < ROWS_SIZE; row++) {
+        // Check for horizontal connections
+        for (int row = ROWS_SIZE - 1; row >= 0; row--) {
             for (int column = 0; column <= COLS_SIZE - 4; column++) {
-                // Check if within array bounds
-                if (board.getTile(row,column ).getValue() == activePlayer ){
-                    connection++;
-                    if( board.getTile( row,column + 1).getValue() == activePlayer ){
-                        connection++;
-                        if(board.getTile( row,column + 2).getValue() == activePlayer){
-                            connection++;
-                            if(board.getTile(row,column + 3).getValue() == activePlayer){
-                                connection++;
-                            }
-                        }
-                    }
-                }
-
+                int connection = checkConnection(board, row, column, 0, 1, activePlayer);
+                maxConnection = Math.max(maxConnection, connection);
             }
         }
 
-        totalConnection += (int) Math.pow(baseNumber,connection);
-        connection = -1;
-        for (int row = 0; row <= ROWS_SIZE - 4; row++) {
+        // Check for vertical connections
+        for (int row = ROWS_SIZE - 1; row >= 3; row--) {
             for (int column = 0; column < COLS_SIZE; column++) {
-                // Check if within array bounds
-                if (board.getTile(row,column).getValue() == activePlayer ){
-                    connection++;
-                    if( board.getTile( row+1,column ).getValue() == activePlayer ){
-                        connection++;
-                        if(board.getTile( row+2,column ).getValue() == activePlayer){
-                            connection++;
-                            if(board.getTile(row+3,column ).getValue() == activePlayer){
-                                connection++;
-                            }
-                        }
-                    }
-                }
-
+                int connection = checkConnection(board, row, column, -1, 0, activePlayer);
+                maxConnection = Math.max(maxConnection, connection);
             }
         }
-        totalConnection += (int) Math.pow(baseNumber,connection);
-        connection = -1;
-        for (int row = 0; row <= ROWS_SIZE- 4; row++) {
+
+        // Check for diagonal connections (bottom-left to top-right)
+        for (int row = ROWS_SIZE - 1; row >= 3; row--) {
             for (int column = 0; column <= COLS_SIZE - 4; column++) {
-                // Check if within array bounds
-                if (board.getTile(row,column ).getValue() == activePlayer ){
-                    connection++;
-                    if( board.getTile( row+1,column + 1).getValue() == activePlayer ){
-                        connection++;
-                        if(board.getTile( row+2,column + 2).getValue() == activePlayer){
-                            connection++;
-                            if(board.getTile(row+3,column + 3).getValue() == activePlayer){
-                                connection++;
-                            }
-                        }
-                    }
-                }
-
+                int connection = checkConnection(board, row, column, -1, 1, activePlayer);
+                maxConnection = Math.max(maxConnection, connection);
             }
         }
-        totalConnection += (int) Math.pow(baseNumber,connection);
-        connection = 0;
-        for (int row = 0; row < ROWS_SIZE- 4; row++) {
+
+        // Check for diagonal connections (bottom-right to top-left)
+        for (int row = ROWS_SIZE - 1; row >= 3; row--) {
             for (int column = 3; column <= COLS_SIZE - 4; column++) {
-                // Check if within array bounds
-                if (board.getTile(row,column ).getValue() == activePlayer ){
-                    connection++;
-                    if( board.getTile( row+1,column - 1).getValue() == activePlayer ){
-                        connection++;
-                        if(board.getTile( row+2,column - 2).getValue() == activePlayer){
-                            connection++;
-                            if(board.getTile(row+3,column-3).getValue() == activePlayer){
-                                connection++;
-                            }
-                        }
-                    }
-                }
-
+                int connection = checkConnection(board, row, column, -1, -1, activePlayer);
+                maxConnection = Math.max(maxConnection, connection);
             }
         }
-        totalConnection += (int) Math.pow(baseNumber,connection);
 
+        int reward = (int) Math.pow(baseNumber, maxConnection);
 
-        if(activePlayer==PLAYER1){
-           this.totalRewardP1 =totalConnection;
-        }else{
-            this.totalRewardP2 =totalConnection;
+        if (activePlayer == PLAYER1) {
+            this.totalRewardP1 = reward;
+        } else {
+            this.totalRewardP2 = reward;
+        }
+    }
+
+    private int checkConnection(Board board, int row, int col, int rowDelta, int colDelta, char activePlayer) {
+        int connection = 0;
+
+        for (int i = 0; i < 4; i++) {
+            int newRow = row + i * rowDelta;
+            int newCol = col + i * colDelta;
+
+            // Check if the indices are within the valid range
+            if (newRow >= 0 && newRow < ROWS_SIZE && newCol >= 0 && newCol < COLS_SIZE) {
+                char value = board.getTile(newRow, newCol).getValue();
+                if (value == activePlayer) {
+                    connection++;
+                } else {
+                    break; // Break the loop if no consecutive connection
+                }
+            } else {
+                break; // Break if indices are out of bounds
+            }
         }
 
-
+        return connection;
     }
+
+
+
 
 
     public void displayBoard() {
@@ -237,6 +218,8 @@ public class Connect4{
             System.out.println();
         }
         System.out.println("---------------");
+
+//
     }
 
         public void resetBoard() {
@@ -301,7 +284,7 @@ public class Connect4{
                 }
             }
 
-            if (!isEmpty()) { // no winner
+            if (!isEmpty()||turn==42) { // no winner
                 winner = 0;
             } else { // game will resume
                 winner = -1;

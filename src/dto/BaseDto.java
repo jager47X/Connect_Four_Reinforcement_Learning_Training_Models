@@ -70,18 +70,23 @@ public abstract class BaseDto {
         StringBuilder state = new StringBuilder( );
 
         String player;
-        if (game.getActivePlayer() == Connect4.PLAYER1) player = "1";
-        else player = "2";
+        if (game.getActivePlayer() == Connect4.PLAYER1){
+            player = "1";
+        } else {
+            player = "2";
+        }
+
         state.append("P");
         state.append(player);
 
-        String location = Integer.toString(game.getLocation());
+        String location = Integer.toString(game.getLocation(game.getCurrentTurn()));
         state.append("L");
         state.append(location);
 
         String winner = Integer.toString(game.getWinner());
-        state.append("S");
+        state.append("W");
         state.append(winner);
+
         String reward;
         if(game.getActivePlayer()==Connect4.PLAYER1){
              reward = Integer.toString(game.getTotalRewardP1());

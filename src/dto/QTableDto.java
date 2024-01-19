@@ -4,7 +4,7 @@ import target.Connect4;
 
 import java.util.Map;
 
-import static dao.QTableDao.table;
+
 
 
 public class QTableDto extends BaseDto{
