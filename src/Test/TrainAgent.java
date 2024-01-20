@@ -64,11 +64,12 @@ public class TrainAgent implements Callable<List<String>> {
 
 
         public static void main(String[] args) throws ExecutionException, InterruptedException {
-            int episodes =10; // Adjust based on your needs
+            int thread =2000; // Adjust based on your needs
             final int nThread=2000;
-            final int nTrain=200;
-             final int nLoop=nTrain/episodes;
+            final int nTrain=8000000;
+             final int nLoop=nTrain/thread;
             long aveProcessTime=0,estimateTotalTime=0;int futureIndex=0;
+            System.out.print("Importing the Data....");
         QTableDao qTableDao = QTableDao.getInstance();
 
             List<String> exportingData = new ArrayList<>();
@@ -84,7 +85,7 @@ public class TrainAgent implements Callable<List<String>> {
         List<Future<List<String>>> futures = new ArrayList<>();
 
        try {
-            for (int episode = 0; episode < episodes; episode++) {
+            for (int episode = 0; episode < thread; episode++) {
 
                 TrainAgent trainAgent = new TrainAgent(episode);
                 Future<List<String>> future = executor.submit(trainAgent);

@@ -8,11 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class BaseDto {
-
-
-
-
-    protected List<String> HashedData=new ArrayList<>();
+    protected List<String> HashedData;
 
 
     public List<String> getHashedData() {
@@ -24,11 +20,12 @@ public abstract class BaseDto {
 
 
     public BaseDto(Connect4 game) {
+        HashedData=new ArrayList<>(42);
         this.game=game;
         this.board=game.getBoard();
     }
     public BaseDto() {
-
+        HashedData=new ArrayList<>(42);
     }
 
     public Board getBoard() {
@@ -50,23 +47,11 @@ public abstract class BaseDto {
 
 
 
-    public void addLine(int turn) {
-        while(turn>HashedData.size()){
-            turn--;
-        }
-        HashedData.add(turn, toIndex());
-  //      System.out.println("turn: " + turn );
- //       System.out.println("Total Size of HashedData: " +HashedData.size() );
-  //      System.out.println("Total Line:");
- //       for (String Line : HashedData) {
- //           System.out.println(Line);
-    //    }
-
-
+    public void addLine() {
+        HashedData.add(toIndex());
     }
 
     public String toIndex() {
-
         StringBuilder state = new StringBuilder( );
 
         String player;
@@ -79,7 +64,7 @@ public abstract class BaseDto {
         state.append("P");
         state.append(player);
 
-        String location = Integer.toString(game.getLocation(game.getCurrentTurn()));
+        String location = Integer.toString(game.getLocation(game.getCurrentTurn()));//1-7
         state.append("L");
         state.append(location);
 

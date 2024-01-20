@@ -19,6 +19,7 @@ public class TestAgent {
         if(!BaseDao.getImportedData().isEmpty()){
             exportingData.addAll(BaseDao.getImportedData());
         }
+        System.out.print("Importing the Data....");
         ReinforceLearningAgentConnectFour Agent = new ReinforceLearningAgentConnectFour(connect4Dto);
         Agent.ReinforceLearning();
         System.out.println("Test:Completed");

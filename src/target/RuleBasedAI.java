@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class RuleBasedAI extends Connect4{
-    private static  int winChoice;
     public RuleBasedAI(){
         super();
     }
@@ -32,14 +31,14 @@ public class RuleBasedAI extends Connect4{
         //pus 1 to return to fit the selction 1-7 instead of 0-6
         // Rule 1: Check if there's a winning move
        // System.out.println("Checking Rule 1");
-        winChoice=isWinningMove(board,activePlayer);
-        if (winChoice!=-1){
+        int winChoice = isWinningMove(board, activePlayer);
+        if (winChoice !=-1){
             return ++winChoice;
         }
         // Rule 2: Block the opponent from winning
        // System.out.println("Checking Rule 2");
-        winChoice=isWinningMove(board,opponent);
-        if (winChoice!=-1){
+        winChoice =isWinningMove(board,opponent);
+        if (winChoice !=-1){
             return ++winChoice;
         }
         // Rule 3: Randomly choose an available column

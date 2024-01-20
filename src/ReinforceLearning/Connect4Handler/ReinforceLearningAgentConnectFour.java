@@ -49,10 +49,10 @@ public class  ReinforceLearningAgentConnectFour  extends AbstractReinforceLearni
             }
             // calculateReward(board.getGame(),);
             if (Environment.winCheck()||Environment.getWinner()==0) {//check winner 1 or 2
-                qTableDto.addLine(Environment.getCurrentTurn());
+                qTableDto.addLine();
                 break;
             }else{
-                qTableDto.addLine(Environment.getCurrentTurn());
+                qTableDto.addLine();
             }
         }while(!isGameOver(Environment));
 
@@ -90,13 +90,13 @@ return qTableDto;
             }
 
 
-            Environment.playerDrop(selectAction()+1);
+            Environment.playerDrop(selectAction());
             Environment.displayBoard();
             if (Environment.winCheck()||Environment.getWinner()==0) {//check winner 1 or 2
-                qTableDto.addLine(Environment.getCurrentTurn());
+                qTableDto.addLine();
                 break;
            }else{
-                qTableDto.addLine(Environment.getCurrentTurn());
+                qTableDto.addLine();
             }
         }while(!isGameOver(Environment));
 
@@ -120,7 +120,7 @@ return qTableDto;
 // Iterate over each column to check if it's a legal action
             for (int col = 0; col < Environment.getCOLS_SIZE(); col++) {
                 if (Environment.isValidColumn(col)) {
-                    legalActionsList.add(col);
+                    legalActionsList.add(col+1);
                 }
             }
 
@@ -135,7 +135,8 @@ return qTableDto;
 
     @Override
     public String stateToIndex(Connect4Dto dto) {
-       int turn= dto.getGame().getCurrentTurn();
+        Connect4 currentBoard=dto.getGame();
+       int turn= currentBoard.getCurrentTurn();
         StringBuilder state = new StringBuilder( );
           for (int i = 0; i < turn; i++) {//add up all action
               if (i % 2==0) {
@@ -143,7 +144,7 @@ return qTableDto;
               }else{
                   state.append(2);
               }
-            state.append(dto.getGame().getLocation(i));
+              state.append(currentBoard.getLocation(i));
         }
         System.out.println("Current state:"+state);
           return state.toString();

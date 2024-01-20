@@ -24,12 +24,10 @@ public class TestRuleBasedAI {
           long start = System.currentTimeMillis();
         int input = 0, turn=0;
         Connect4 game = new Connect4();
-        Scanner keyboard = new Scanner(System.in);
         game.setActivePlayer(Connect4.PLAYER2);
 
-          QTableDao dao=QTableDao.getInstance();
           QTableDto dto= new QTableDto(game);
-          List<String> exportingData = BaseDao.getImportedData();
+
         do {
             game.setActivePlayer((game.getActivePlayer() == Connect4.PLAYER2) ? Connect4.PLAYER1 : Connect4.PLAYER2);
             turn++;
@@ -66,7 +64,7 @@ public class TestRuleBasedAI {
                 game.displayBoard();
                 break;
             }else{//game keep goinh
-                dto.addLine(turn);
+                dto.addLine();
             }
 
 

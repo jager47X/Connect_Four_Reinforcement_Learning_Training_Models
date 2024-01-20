@@ -1,21 +1,18 @@
 package dao;
 
-
-import dto.BaseDto;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public abstract class BaseDao <T extends BaseDto> {
+public abstract class BaseDao {
 
 
 
-    protected static List<String> ImportedData=new ArrayList<>(1000);
+    protected static List<String> ImportedData=new ArrayList<>();
+
 
     public static List<String> getImportedData() {
         if(ImportedData==null){
@@ -26,7 +23,6 @@ public abstract class BaseDao <T extends BaseDto> {
     }
 
     public void import_CSV() {
-
 
         try (BufferedReader reader = new BufferedReader(new FileReader(CSV.getFile()))) {
             String line;
@@ -44,7 +40,6 @@ public abstract class BaseDao <T extends BaseDto> {
             System.err.println("ERROR : " + e.getMessage());
             e.printStackTrace();
         }
-
 
     }
 

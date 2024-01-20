@@ -1,15 +1,14 @@
 package dao;
 
-import dto.QTableDto;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class QTableDao extends BaseDao<QTableDto> {
+public class QTableDao extends BaseDao {
 
     private static QTableDao instance;
-    private Map<String, QEntry> table = new HashMap<>();
+    private final Map<String, QEntry> table = new HashMap<>();
     int player;
     List<Integer> location=new ArrayList<>();
     int winner;
@@ -22,6 +21,8 @@ public class QTableDao extends BaseDao<QTableDto> {
     }
 
     private void initializeMap() {
+        String initialState="00";
+        table.put(initialState, new QEntry(0,0));
         if (ImportedData != null) {
             int turn=0;
             int game=1;
@@ -43,8 +44,9 @@ public class QTableDao extends BaseDao<QTableDto> {
                         state.append(2);
                     }
                     state.append(location.get(i));
-                    System.out.println("state:"+state.toString());
                 }
+                System.out.println("state:"+state);
+                System.out.println("action:"+action+"reward:"+reward);
                     table.put(state.toString(), new QEntry(action,reward));
 
                 if(winner!=-1){//last move
@@ -73,7 +75,6 @@ public class QTableDao extends BaseDao<QTableDto> {
             this.location.add(Integer.parseInt(matcher.group(2)));
             this.winner = Integer.parseInt(matcher.group(3));
             this.reward = Integer.parseInt(matcher.group(4));
-
             System.out.println("Player: " + this.player + ", Location: " + this.location + ", Movement: " + this.winner + ", Reward: " + this.reward);
         }
     }
@@ -81,16 +82,23 @@ public class QTableDao extends BaseDao<QTableDto> {
 
 
     public QEntry getQvalue(String state) {
-        if(Objects.equals(state, "")){
+        if(Objects.equals(state, "00")){
             //insert the first move
+            System.out.println("first move");
+            return new QEntry(0, 0); //indicate the first state
         }
-        QEntry qEntry = table.get(state);
-        if (qEntry != null) {
-            return qEntry;
+        if(!table.containsKey(state)){
+            System.out.println("The state is absence on the Qtable");
+            // Return a default QEntry indicating the absence of the state
+            return new QEntry(-1, -1); // default values for null
         }
 
-        // Return a default QEntry indicating the absence of the state
-        return new QEntry(-1, -1); // You can choose appropriate default values
+        QEntry qEntry = table.get(state);
+        System.out.println("state: "+state);
+        return qEntry;
+
+
+
     }
 
     public int getTableSize() {

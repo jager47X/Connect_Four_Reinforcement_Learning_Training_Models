@@ -9,6 +9,9 @@ public class Connect4{
     public   static final char PLAYER1 = 'X';
     public  static final char PLAYER2 = 'O';
     public static final char EMPTY = '_';
+
+
+
     private static final int SIZE_OF_BOARD=COLS_SIZE*ROWS_SIZE;
         private char activePlayer;
         private char nonActivePlayer;
@@ -17,7 +20,7 @@ public class Connect4{
         private int winner;
         private int totalRewardP1;
         private int totalRewardP2;
-        private List<Integer> location;
+        private final List<Integer> location;
         int totalConnection;
     public Board getBoard() {
         return board;
@@ -48,7 +51,7 @@ public class Connect4{
         this.totalRewardP2 =0;
         this.totalConnection=-1;
         this.board = new Board(COLS_SIZE, ROWS_SIZE,EMPTY,PLAYER1,PLAYER2);
-        location=new ArrayList<>();
+        location=new ArrayList<>(42);
     }
 
     public int getCurrentTurn() {
@@ -128,14 +131,17 @@ public class Connect4{
     }
 
     public int getLocation(int index) {
-        if(index>location.size()){
-            return -1;
+        if(location.isEmpty()){
+            return 0;
+        }
+        while(index!=location.size()-1){
+            index--;
         }
         return location.get(index);
     }
 
     public void setLocation(int column) {
-        this.location.add(column);
+        this.location.add(column+1);
     }
     private void calculateReward(char activePlayer) {
         final int baseNumber = 4;

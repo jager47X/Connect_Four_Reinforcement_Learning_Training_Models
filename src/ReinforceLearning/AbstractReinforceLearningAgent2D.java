@@ -27,7 +27,7 @@ public abstract class AbstractReinforceLearningAgent2D implements ReinforceLearn
     protected Connect4Dto connect4Dto;
     static int ROWS;
     static int COLS;
-    private final QEntry nullEntry=new QEntry(-1,-1);
+
     static int ACTIONS;
 
     public QTableDao getQTable() {
@@ -77,16 +77,15 @@ public abstract class AbstractReinforceLearningAgent2D implements ReinforceLearn
         } else {
             // Exploitation: choose the action with the highest Q-value
             String stateIndex = stateToIndex(connect4Dto);// converting the current state of the environment into an index
-            if(Objects.equals(stateIndex, "")){
-                return 3;
-            }
-            System.out.println("checking the matched state from csv:"+stateIndex);
+            System.out.println(
+                    "\naction 1 reward :"+getQTable().getQvalue(stateIndex).getReward(1)+
+                    "\naction 2 reward :"+getQTable().getQvalue(stateIndex).getReward(2)+
+                    "\naction 3 reward :"+getQTable().getQvalue(stateIndex).getReward(3)+
+                    "\naction 4 reward :"+getQTable().getQvalue(stateIndex).getReward(4)+
+                    "\naction 5 reward :"+getQTable().getQvalue(stateIndex).getReward(5)+
+                    "\naction 6 reward :"+getQTable().getQvalue(stateIndex).getReward(6)+
+                    "\naction 7 reward :"+getQTable().getQvalue(stateIndex).getReward(7));
             int[] legalActions = getLegalActions();//place chip by AI on the available columns
-            if (Objects.equals(QTable.getQvalue(stateIndex), nullEntry)) {//if cant find a state return null
-                System.out.println("could not find the matched state from csv:"+QTable.getQvalue(stateIndex).toString());
-                return legalActions[new Random().nextInt(legalActions.length)];
-            }
-            System.out.println("found the matched state from csv:"+QTable.getQvalue(stateIndex).toString());
             QEntry qValues= QTable.getQvalue(stateIndex);//retrieving the Q-values associated with the current state from the Q-table.
 
             return findBestAction(legalActions,qValues);//find the best action and return it
@@ -94,9 +93,7 @@ public abstract class AbstractReinforceLearningAgent2D implements ReinforceLearn
     }
 
     private int findBestAction(int[] legalActions,  QEntry  qValues){
-        if(qValues==nullEntry){
-            return legalActions[new Random().nextInt(legalActions.length)];
-        }
+
         int bestAction = legalActions[0];//initialize bestAction by taking the head of legalAction
         double bestQValue = qValues.getReward(bestAction);
 
@@ -106,6 +103,10 @@ public abstract class AbstractReinforceLearningAgent2D implements ReinforceLearn
                 bestAction = action;
                 bestQValue = qValues.getReward(action);
             }
+        }
+        if(bestQValue==-1){
+            System.out.println("Reward is -1 returning random choice");
+            return legalActions[new Random().nextInt(legalActions.length)];
         }
         System.out.println("returning the bestaction:"+bestAction);
         return bestAction;
