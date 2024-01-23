@@ -1,42 +1,31 @@
 package ReinforceLearning;
 
 import dao.QEntry;
-import dao.QTableDao;
 import dto.Connect4Dto;
 import dto.QTableDto;
 import target.Connect4;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 interface ReinforceLearningAgent2D{
-    QTableDto SupervisedLeanrning();
+    QTableDto SupervisedLearning();
     QTableDto ReinforceLearning();
     int[] getLegalActions();
-    String stateToIndex(Connect4Dto state);
     int selectAction();
-
 
 
 }
 public abstract class AbstractReinforceLearningAgent2D implements ReinforceLearningAgent2D{
-    protected QTableDao QTable;
+
     // Environment-specific variables
     protected Connect4 Environment;
+    protected QTableDto QtableDto;
     protected Connect4Dto connect4Dto;
     static int ROWS;
     static int COLS;
 
     static int ACTIONS;
 
-    public QTableDao getQTable() {
-        return QTable;
-    }
-
-    public void setQTable(QTableDao QTable) {
-        this.QTable = QTable;
-    }
 
     public Connect4 getEnvironment() {
         return Environment;
@@ -52,66 +41,137 @@ public abstract class AbstractReinforceLearningAgent2D implements ReinforceLearn
         COLS=connect4Dto.getGame().getCOLS_SIZE();
         ACTIONS=connect4Dto.getGame().getCOLS_SIZE();
         this.connect4Dto=connect4Dto;
-        this.QTable= QTableDao.getInstance();
+
+
         Environment=connect4Dto.getGame();
+        QtableDto=new QTableDto();
     }
 
 
-    // Hyperparameters
+    // Hyper-parameters
     double learningRate = 0.1;
     double discountFactor = 0.9;
-    double explorationRate = 0.1;
     double minExplorationRate = 0.1;
     double explorationDecay = 0.95;
+    double explorationRate=1-learningRate;
 
-
+    StringBuilder state = new StringBuilder();
     // Action selection logic
 
     @Override
     public int selectAction() {
         if (Math.random() < explorationRate) {
             // Exploration: choose a random action
-            System.out.println("using random action");
-            int[] legalActions = getLegalActions();//place chip by AI on the available columns
+            System.out.println("Exploration");
+            int[] legalActions = getLegalActions();
+            if (explorationRate > minExplorationRate) {
+                explorationRate = explorationRate * explorationDecay;
+            }
             return legalActions[new Random().nextInt(legalActions.length)];
         } else {
             // Exploitation: choose the action with the highest Q-value
-            String stateIndex = stateToIndex(connect4Dto);// converting the current state of the environment into an index
-            System.out.println(
-                    "\naction 1 reward :"+getQTable().getQvalue(stateIndex).getReward(1)+
-                    "\naction 2 reward :"+getQTable().getQvalue(stateIndex).getReward(2)+
-                    "\naction 3 reward :"+getQTable().getQvalue(stateIndex).getReward(3)+
-                    "\naction 4 reward :"+getQTable().getQvalue(stateIndex).getReward(4)+
-                    "\naction 5 reward :"+getQTable().getQvalue(stateIndex).getReward(5)+
-                    "\naction 6 reward :"+getQTable().getQvalue(stateIndex).getReward(6)+
-                    "\naction 7 reward :"+getQTable().getQvalue(stateIndex).getReward(7));
-            int[] legalActions = getLegalActions();//place chip by AI on the available columns
-            QEntry qValues= QTable.getQvalue(stateIndex);//retrieving the Q-values associated with the current state from the Q-table.
+            String stateIndex = stateToIndex(this.connect4Dto);
 
-            return findBestAction(legalActions,qValues);//find the best action and return it
+
+            Set<QEntry> qValues = QtableDto.getQEntry(stateIndex);
+
+            System.out.println("Q-Values for State " + stateIndex + ":");
+            for (QEntry qEntry : qValues) {
+                Set<Integer> actions = qEntry.getAction();
+                for (Integer action : actions) {
+                    System.out.println("QEntry: Action " + action + " reward: " + qEntry.getQValue(action));
+                }
+            }
+
+            int[] legalActions = getLegalActions();
+
+            return findBestAction(legalActions, qValues);
+
         }
     }
 
-    private int findBestAction(int[] legalActions,  QEntry  qValues){
-
-        int bestAction = legalActions[0];//initialize bestAction by taking the head of legalAction
-        double bestQValue = qValues.getReward(bestAction);
 
 
-        for (int action : legalActions) {///find the best
-            if (qValues.getReward(action) > bestQValue) {
-                bestAction = action;
-                bestQValue = qValues.getReward(action);
+
+    private int findBestAction(int[] legalActions, Set<QEntry> qValues) {
+        double bestQValue = 0.0; // initialize with the minimum possible value
+        List<Integer> bestActions = new ArrayList<>();
+
+        for (QEntry qEntry : qValues) {
+            Set<Integer> actions = qEntry.getAction();
+            for (Integer action : actions) {
+                double qValue = qEntry.getQValue(action);
+                if (qValue > bestQValue) {
+                    bestQValue = qValue;
+                    bestActions.clear();
+                    bestActions.add(action);
+                } else if (qValue == bestQValue) {
+                    bestActions.add(action);
+                }
             }
         }
-        if(bestQValue==-1){
-            System.out.println("Reward is -1 returning random choice");
-            return legalActions[new Random().nextInt(legalActions.length)];
+
+        if (!bestActions.isEmpty()) {
+            int randomIndex = new Random().nextInt(bestActions.size());
+            int bestAction = bestActions.get(randomIndex);
+
+            System.out.println("Returning the best action: " + bestAction);
+            return bestAction;
         }
-        System.out.println("returning the bestaction:"+bestAction);
-        return bestAction;
+
+        System.out.println("BestQValue is " + bestQValue + " returning random choice");
+        return legalActions[new Random().nextInt(legalActions.length)];
     }
 
 
-}
 
+    public void updateQValue(String state, int action, double immediateReward, String nextState) {
+        Map<Integer, Double> currentQValues = QtableDto.getQValues(state,action);
+
+        // Ensure that the action is present in the Q-values map
+        if (currentQValues.containsKey(action)) {
+            double currentQValue = currentQValues.get(action);
+            double maxNextQValue = QtableDto.getMaxQValue(nextState);
+
+            double updatedQValue = (1 - learningRate) * currentQValue +
+                    learningRate * (immediateReward + discountFactor * maxNextQValue);
+
+            QtableDto.updateQValue(state, action, updatedQValue);
+        } else {
+            // Handle the case when the action is not present in the Q-values map
+            System.out.println("Action " + action + " not present in Q-values for state " + state);
+        }
+    }
+
+
+    private String stateToIndex(Connect4Dto dto) {
+        Connect4 currentBoard = dto.getGame();
+        int turn = currentBoard.getCurrentTurn();
+
+        System.out.println("currentTurn " + turn);
+
+        if (turn == 0) {
+            state=new StringBuilder();
+            state.append("00");
+        }else{
+            if (currentBoard.getActivePlayer()==Connect4.PLAYER1) {
+                state.append("1");
+            } else {
+                state.append("2");
+            }
+            state.append(currentBoard.getLocation(turn));
+        }
+
+
+        System.out.println("Current state: " + state);
+        return state.toString();
+    }
+
+    public StringBuilder getState() {
+        return state;
+    }
+
+    public void setState(StringBuilder state) {
+        this.state = state;
+    }
+}

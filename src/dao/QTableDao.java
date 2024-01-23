@@ -1,62 +1,30 @@
 package dao;
 
 
+import target.Connect4;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class QTableDao extends BaseDao {
 
-    private static QTableDao instance;
-    private final Map<String, QEntry> table = new HashMap<>();
-    int player;
-    List<Integer> location=new ArrayList<>();
+    protected static QTableDao instance;
+    private final Map<String, Set<QEntry>> qTable;
+
+    List <List<Integer>> locationList;
+
+    List <List<Double>> rewardList;
+
     int winner;
-    int reward ;
 
-    private QTableDao() {
-        super();
-        import_CSV();// Import QTable from CSV
-        initializeMap();
+
+
+    public Map<String, Set<QEntry>> getQTable() {
+        return qTable;
     }
 
-    private void initializeMap() {
-        String initialState="00";
-        table.put(initialState, new QEntry(0,0));
-        if (ImportedData != null) {
-            int turn=0;
-            int game=1;
-
-            for (String importedMove : ImportedData) {
-                if(importedMove==null){
-                    break;
-                }
-                turn++;
-                int action = -1;
-                StringBuilder state = new StringBuilder( );
-                System.out.println("game:"+game+" turn:"+turn);
-                    parseMove(importedMove);
-                    action= location.get(location.size()-1);//put the current location(action)
-                for (int i = 0; i < turn; i++) {//add up all action
-                    if (i % 2==0) {
-                        state.append(1);
-                    }else{
-                        state.append(2);
-                    }
-                    state.append(location.get(i));
-                }
-                System.out.println("state:"+state);
-                System.out.println("action:"+action+"reward:"+reward);
-                    table.put(state.toString(), new QEntry(action,reward));
-
-                if(winner!=-1){//last move
-                    turn=0;
-                    location.clear();
-                    game++;
-                }
-            }
-        }
-    }
+    String importingModel ="Supervised_Learning_policyNetwork.csv";
 
     public static QTableDao getInstance() {
         if (instance != null) {
@@ -65,43 +33,148 @@ public class QTableDao extends BaseDao {
         instance = new QTableDao();
         return instance;
     }
+    public QTableDao() {
+        super();
+        import_CSV(importingModel);// Import QTable from CSV
+        qTable= new HashMap<>();
+        locationList=new ArrayList<>();
+        rewardList=new ArrayList<>();
+        initializeMap();
+    }
 
-    private  void parseMove(String move) {
-        Pattern pattern = Pattern.compile("P([12])L(\\d+)W(-?\\d)R(\\d+)");
+
+    private void initializeMap() {
+        // Load all into List location and reward
+// Load all into List location and reward
+        if (ImportedGames != null) {
+            for (List<String> importedGame : ImportedGames) {
+                if (importedGame != null) {
+                    // Create new instances of location and reward lists for each game iteration
+                    List<Integer> location = new ArrayList<>();
+                    List<Double> reward = new ArrayList<>();
+
+                    for (String move : importedGame) {
+                        location.add(addLocation(move));
+                        reward.add(addReward(move));
+                    }
+
+                    // Add the new instances to locationList and rewardList
+                    locationList.add(location);
+                    rewardList.add(reward);
+                }
+            }
+        }
+
+        //iterate over
+        if (ImportedGames!= null) {
+
+          //  Connect4 connect4;
+
+            for (int gameIndex = 0; gameIndex < ImportedGames.size(); gameIndex++) {
+              //  connect4=new Connect4();
+                for (int turn = 0; turn <ImportedGames.get(gameIndex).size()-1; turn++) {
+                    int action = 0;
+                    double qvalue=0.0;
+                    if(locationList.get(gameIndex).size()>turn){
+                        action= locationList.get(gameIndex).get(turn+1);
+                        qvalue = rewardList.get(gameIndex).get(turn+1);
+                    }
+
+
+
+                    int game=gameIndex+1;
+                    int currentTurn=turn+1;
+                    System.out.println("game:"+game+" turn:"+currentTurn);
+                    parseWinner(ImportedGames.get(gameIndex).get(turn));
+/*
+                    if(turn%2==0){
+                        connect4.setActivePlayer(Connect4.PLAYER2);
+                        connect4.setNonActivePlayer(Connect4.PLAYER1);
+                    }else{
+                        connect4.setActivePlayer(Connect4.PLAYER1);
+                        connect4.setNonActivePlayer(Connect4.PLAYER2);
+                    }
+
+                    connect4.playerDrop(action);
+                    connect4.displayBoard();
+
+                    if(qvalue==64){
+                        if(turn%2==0){
+                            winner=2;
+                        }else {
+                            winner=1;
+                        }
+                        connect4=new Connect4();
+                    }*/
+                    StringBuilder state = new StringBuilder( );
+                    for (int index = 0; index < turn+1; index++) {//add up all action
+                        if (index==0) {
+                            state.append(0);
+                        }else if(index%2==0){
+                            state.append(2);
+                        }else{
+                            state.append(1);
+                        }
+                        state.append(locationList.get(gameIndex).get(index));
+                    }
+
+                    System.out.println("Qtable:Saving state:"+state);
+                    System.out.println("Qtable:Saving action:"+action+", reward:"+ qvalue+", winner:"+winner);
+                    updateQTable(state.toString(),  action, qvalue);
+                }
+
+            }
+        }
+    }
+    private void updateQTable(String state, int action, double qvalue) {
+        QEntry qEntry = new QEntry(action, qvalue);
+
+        Set<QEntry> qEntrySet = qTable.computeIfAbsent(state, k -> new HashSet<>());
+
+        // Check if an entry with the same action already exists
+        boolean containsAction = qEntrySet.stream()
+                .anyMatch(entry -> entry.getAction().contains(action));
+
+        if (containsAction) {
+            // Entry with the same action exists, update it if needed
+            qEntrySet.forEach(entry -> {
+                if (entry.getAction().contains(action)) {
+                    entry.setQValue(action, qvalue);
+                }
+            });
+        } else {
+            // Entry with the same action doesn't exist, add the new QEntry
+            qEntrySet.add(qEntry);
+        }
+    }
+    private  void parseWinner(String move) {
+        System.out.println("reading move:"+move);
+        Pattern pattern = Pattern.compile("P([012])L(\\d+)W(-?\\d+)R(\\d+)");
         Matcher matcher = pattern.matcher(move);
-
         if (matcher.matches()) {
-            this.player = Integer.parseInt(matcher.group(1));
-            this.location.add(Integer.parseInt(matcher.group(2)));
-            this.winner = Integer.parseInt(matcher.group(3));
-            this.reward = Integer.parseInt(matcher.group(4));
-            System.out.println("Player: " + this.player + ", Location: " + this.location + ", Movement: " + this.winner + ", Reward: " + this.reward);
+            this.winner=Integer.parseInt(matcher.group(3));
+            //  System.out.println("Player: " + this.player + ", Location: " + this.location + ", Movement: " + this.winner + ", Reward: " + this.qValue);
         }
+    }
+    private int addLocation(String move) {
+    int location=0;
+        Pattern pattern = Pattern.compile("P([012])L(\\d+)W(-?\\d+)R(\\d+)");
+        Matcher matcher = pattern.matcher(move);
+        if (matcher.matches()) {
+            location=Integer.parseInt(matcher.group(2));
+           }
+        return location;
+    }
+    private  double addReward(String move) {
+       double reward=0.0;
+        Pattern pattern = Pattern.compile("P([012])L(\\d+)W(-?\\d+)R(\\d+)");
+        Matcher matcher = pattern.matcher(move);
+        if (matcher.matches()) {
+            reward=Double.parseDouble(matcher.group(4));
+        }
+
+        return reward;
     }
 
 
-
-    public QEntry getQvalue(String state) {
-        if(Objects.equals(state, "00")){
-            //insert the first move
-            System.out.println("first move");
-            return new QEntry(0, 0); //indicate the first state
-        }
-        if(!table.containsKey(state)){
-            System.out.println("The state is absence on the Qtable");
-            // Return a default QEntry indicating the absence of the state
-            return new QEntry(-1, -1); // default values for null
-        }
-
-        QEntry qEntry = table.get(state);
-        System.out.println("state: "+state);
-        return qEntry;
-
-
-
-    }
-
-    public int getTableSize() {
-        return table.size();
-    }
 }

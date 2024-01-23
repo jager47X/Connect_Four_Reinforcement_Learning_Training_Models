@@ -1,6 +1,6 @@
 package Test;
 
-import ReinforceLearning.Connect4Handler.ReinforceLearningAgentConnectFour;
+import ReinforceLearning.ReinforceLearningAgentConnectFour;
 import com.sun.management.OperatingSystemMXBean;
 import dao.BaseDao;
 import dao.QTableDao;
@@ -46,8 +46,6 @@ public class TrainAgentRL implements Callable<List<String>> {
                 if (Qtable.getHashedData() == null || Qtable.getHashedData().isEmpty()) {
                     //           System.out.println("Thread " + Thread.currentThread().getId() + ": Warning - hashedData is null or empty.");
                     return new ArrayList<>();
-                } else {
-                    //           System.out.println("Thread " + Thread.currentThread().getId() + ": hashedData is " + Qtable.getHashedData());
                 }
 
                 return Qtable.getHashedData();
@@ -63,7 +61,7 @@ public class TrainAgentRL implements Callable<List<String>> {
 
 
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) throws  InterruptedException {
         int episodes =10; // Adjust based on your needs
         final int nThread=2000;
         final int nTrain=200;
@@ -72,8 +70,11 @@ public class TrainAgentRL implements Callable<List<String>> {
         QTableDao qTableDao = QTableDao.getInstance();
 
         List<String> exportingData = new ArrayList<>();
-        if(!BaseDao.getImportedData().isEmpty()){
-            exportingData.addAll(BaseDao.getImportedData());
+        if(!BaseDao.getImportedGame().isEmpty()){
+            for (int i = 0; i < BaseDao.getImportedGame().size(); i++) {
+                exportingData.addAll(BaseDao.getImportedGame().get(i));
+            }
+
         }
         int trainIndex=0;
         for (int i = 0; i < nLoop; i++) {
@@ -87,16 +88,16 @@ public class TrainAgentRL implements Callable<List<String>> {
             int totalTrain=episodes * nLoop;
             try {
                 for (int episode = 0; episode < episodes; episode++) {
-                    TrainAgent trainAgent = new TrainAgent(episode);
+                    TrainAgentSL trainAgent = new TrainAgentSL(episode);
                     Future<List<String>> future = executor.submit(trainAgent);
                     futures.add(future);
                     System.out.print("Strating Thread: #"+episode+", ");
                     Thread.sleep(monitorCPUUsage());
                 }
-                long speed=0,time=0;int futureIndex=0;
+                long speed=0,time=0;
                 // Wait for all threads to finish
                 for (Future<List<String>> future : futures) {
-                    futureIndex++;
+
                     trainIndex++;
 
 
@@ -143,7 +144,7 @@ public class TrainAgentRL implements Callable<List<String>> {
             }
 
             System.out.print("exporting....");
-            qTableDao.exportCSV(exportingData);
+            qTableDao.exportCSV(exportingData,"Reinforce_Learning_policyNetwork.csv");
 
         }
 

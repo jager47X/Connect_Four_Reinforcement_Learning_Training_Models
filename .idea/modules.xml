@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/C4ML.iml" filepath="$PROJECT_DIR$/C4ML.iml" />
+      <module fileurl="file://$PROJECT_DIR$/connect_Four_RL_java.iml" filepath="$PROJECT_DIR$/connect_Four_RL_java.iml" />
     </modules>
   </component>
 </project>

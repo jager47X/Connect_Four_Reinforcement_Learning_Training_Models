@@ -48,6 +48,9 @@ public abstract class BaseDto {
 
 
     public void addLine() {
+        if(HashedData.isEmpty()){
+            HashedData.add("P0L0W-1R0");
+        }
         HashedData.add(toIndex());
     }
 

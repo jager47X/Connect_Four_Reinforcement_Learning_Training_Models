@@ -12,12 +12,14 @@ public class Connect4{
 
 
 
+
     private static final int SIZE_OF_BOARD=COLS_SIZE*ROWS_SIZE;
         private char activePlayer;
         private char nonActivePlayer;
         private  Board board;
         private int turn;
         private int winner;
+        private final int winningPoint=64;
         private int totalRewardP1;
         private int totalRewardP2;
         private final List<Integer> location;
@@ -179,7 +181,7 @@ public class Connect4{
             }
         }
 
-        int reward = (int) Math.pow(baseNumber, maxConnection);
+        int reward = (int) Math.pow(baseNumber, maxConnection-1);//1 chip=0 2 chip=4
 
         if (activePlayer == PLAYER1) {
             this.totalRewardP1 = reward;
@@ -234,64 +236,16 @@ public class Connect4{
 
 
         public boolean winCheck() {
-            // Check for horizontal wins
-            for (int row = 0; row < ROWS_SIZE; row++) {
-                for (int column = 0; column <= COLS_SIZE - 4; column++) {
-                    // Check if within array bounds
-                    if (board.getTile(row,column ).getValue() == activePlayer &&
-                            board.getTile( row,column + 1).getValue() == activePlayer &&
-                            board.getTile(row,column + 2).getValue() == activePlayer &&
-                            board.getTile(row,column + 3).getValue() == activePlayer) {
-                        winner = (activePlayer == PLAYER1) ? 1 : 2;
-                        return true;
-                    }
-                }
-            }
-
-            // Check for vertical wins
-            for (int row = 0; row <= ROWS_SIZE - 4; row++) {
-                for (int column = 0; column < COLS_SIZE; column++) {
-                    // Check if within array bounds
-                    if (board.getTile(row,column).getValue() == activePlayer &&
-                            board.getTile(row + 1,column).getValue() == activePlayer &&
-                            board.getTile(row + 2,column).getValue() == activePlayer &&
-                            board.getTile(row + 3,column).getValue() == activePlayer) {
-                        winner = (activePlayer == PLAYER1) ? 1 : 2;
-                        return true;
-                    }
-                }
-            }
-
-            // Check for diagonal wins (left to right)
-            for (int row = 0; row <= ROWS_SIZE - 4; row++) {
-                for (int column = 0; column <= COLS_SIZE - 4; column++) {
-                    // Check if within array bounds
-                    if (board.getTile(row,column).getValue() == activePlayer &&
-                            board.getTile(row + 1,column + 1).getValue() == activePlayer &&
-                            board.getTile(row + 2,column + 2).getValue() == activePlayer &&
-                            board.getTile(row + 3,column + 3).getValue() == activePlayer) {
-                        winner = (activePlayer == PLAYER1) ? 1 : 2;
-                        return true;
-                    }
-                }
-            }
-
-            // Check for diagonal wins (right to left)
-            for (int row = 0; row <= ROWS_SIZE - 4; row++) {
-                for (int column = 3; column < COLS_SIZE; column++) {
-                    // Check if within array bounds
-                    if (board.getTile(row,column).getValue() == activePlayer &&
-                            board.getTile(row + 1,column - 1).getValue() == activePlayer &&
-                            board.getTile(row + 2,column - 2).getValue() == activePlayer &&
-                            board.getTile(row + 3,column - 3).getValue() == activePlayer) {
-                        winner = (activePlayer == PLAYER1) ? 1 : 2;
-                        return true;
-                    }
-                }
-            }
 
             if (!isEmpty()||turn==42) { // no winner
                 winner = 0;
+                return true;
+            } else if(totalRewardP1==winningPoint){
+                winner=1;
+                return true;
+            } else if (totalRewardP2==winningPoint){
+                winner=2;
+                return true;
             } else { // game will resume
                 winner = -1;
             }
