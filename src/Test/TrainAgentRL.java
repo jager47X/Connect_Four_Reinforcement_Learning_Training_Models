@@ -62,9 +62,9 @@ public class TrainAgentRL implements Callable<List<String>> {
 
 
     public static void main(String[] args) throws  InterruptedException {
-        int episodes =10; // Adjust based on your needs
+        int episodes =1000; // Adjust
         final int nThread=2000;
-        final int nTrain=200;
+        final int nTrain=2000;
         final int nLoop=nTrain/episodes;
         System.out.print("Importing the Data....");
         QTableDao qTableDao = QTableDao.getInstance();
@@ -118,8 +118,7 @@ public class TrainAgentRL implements Callable<List<String>> {
                             System.out.println(future.state());
                         } else {
                             System.out.println("Thread result is null. Check the TrainAgent.train() method.");
-                            // You may want to handle this case based on your application's requirements
-                        }
+                                        }
 
                         Thread.sleep(monitorCPUUsage());
                         if (trainIndex < 2) {
@@ -142,6 +141,7 @@ public class TrainAgentRL implements Callable<List<String>> {
             } finally {
                 executor.shutdownNow(); // Shutdown the executor immediately in case of exceptions
             }
+
 
             System.out.print("exporting....");
             qTableDao.exportCSV(exportingData,"Reinforce_Learning_policyNetwork.csv");

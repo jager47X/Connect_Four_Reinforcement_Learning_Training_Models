@@ -11,17 +11,21 @@ public class TestAgent {
     public static void main(String[] args) {
         //train agent//choose human or self learn or train agent
         //for human interaction episodes=1;
-        Connect4 game=new Connect4();
-        Connect4Dto connect4Dto=new Connect4Dto(game);
+
+
         List<String> exportingData = new ArrayList<>();
         if(!BaseDao.getImportedGame().isEmpty()){
             for (int i = 0; i < BaseDao.getImportedGame().size(); i++) {
                 exportingData.addAll(BaseDao.getImportedGame().get(i));
             }
         }
+        for (int i = 0; i <100 ; i++) {
+            Connect4 game=new Connect4();
+            Connect4Dto connect4Dto=new Connect4Dto(game);
+            ReinforceLearningAgentConnectFour Agent = new ReinforceLearningAgentConnectFour(connect4Dto);
+            Agent.ReinforceLearning();
 
-        ReinforceLearningAgentConnectFour Agent = new ReinforceLearningAgentConnectFour(connect4Dto);
-        Agent.ReinforceLearning();
+        }
 
         System.out.println("Test:Completed");
     }

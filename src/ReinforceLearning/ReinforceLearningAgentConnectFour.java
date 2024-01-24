@@ -23,7 +23,6 @@ public class  ReinforceLearningAgentConnectFour  extends AbstractReinforceLearni
     @Override
     public QTableDto SupervisedLearning() {//use multi-thread //if episodes=1 then vs human if not AI vs AI
 
-
         QTableDto qTableDto=new QTableDto(Environment);
         Environment.setActivePlayer(Connect4.PLAYER2);
         Environment.setTurn(0);
@@ -117,6 +116,11 @@ return qTableDto;
 return qTableDto;
     }
 
+    //trainAgent RL
+    //take Dto as a list
+    //after take dto as list reset environment
+    //while (back to take dto)
+    //export at once
 
     public void resetBoard(Connect4 game) {
         game.resetBoard();

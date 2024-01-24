@@ -64,7 +64,7 @@ public class TrainAgentSL implements Callable<List<String>> {
 
 
         public static void main(String[] args) throws ExecutionException, InterruptedException {
-            int thread =2000; // Adjust based on your needs
+            int thread =2000; // Adjust
             final int nThread=2000;
             final int nTrain=1000000;
              final int nLoop=nTrain/thread;
@@ -122,8 +122,7 @@ public class TrainAgentSL implements Callable<List<String>> {
 
                     } else {
                         System.out.println("Thread result is null. Check the TrainAgent.train() method.");
-                        // You may want to handle this case based on your application's requirements
-                    }
+                       }
 
                     Thread.sleep(monitorCPUUsage());
                         if(trainIndex%10==0){
