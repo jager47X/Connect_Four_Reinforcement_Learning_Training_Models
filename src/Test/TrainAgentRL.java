@@ -20,12 +20,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 public class TrainAgentRL implements Callable<List<String>> {
-    int trainNum;
+
+    List<QTableDto> QTableDtoList;
     private final Lock agentLock = new ReentrantLock();
-    private static final long startTime = System.currentTimeMillis();
-    public TrainAgentRL(int trainNum) {
-        this.trainNum = trainNum;
-    }
+    private static long startTime = System.currentTimeMillis();
+
 
     @Override
     public List<String> call() {
@@ -36,16 +35,19 @@ public class TrainAgentRL implements Callable<List<String>> {
     private List<String> train() {
         Connect4 game = new Connect4();
         Connect4Dto connect4Dto = new Connect4Dto(game);
-        ReinforceLearningAgentConnectFour agent = new ReinforceLearningAgentConnectFour(connect4Dto);
+
+        ReinforceLearningAgentConnectFour agent = new ReinforceLearningAgentConnectFour(connect4Dto, QTableDtoList);
 
 
         if (agentLock.tryLock()) {
             try {
                 QTableDto Qtable = agent.ReinforceLearning();
-
+                QTableDtoList.add(Qtable);
                 if (Qtable.getHashedData() == null || Qtable.getHashedData().isEmpty()) {
                     //           System.out.println("Thread " + Thread.currentThread().getId() + ": Warning - hashedData is null or empty.");
                     return new ArrayList<>();
+                } else {
+                    //           System.out.println("Thread " + Thread.currentThread().getId() + ": hashedData is " + Qtable.getHashedData());
                 }
 
                 return Qtable.getHashedData();
@@ -61,12 +63,13 @@ public class TrainAgentRL implements Callable<List<String>> {
 
 
 
-    public static void main(String[] args) throws  InterruptedException {
-        int episodes =1000; // Adjust
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        int thread =2000; // Adjust
         final int nThread=2000;
-        final int nTrain=2000;
-        final int nLoop=nTrain/episodes;
-        System.out.print("Importing the Data....");
+        final int nTrain=1000000;
+        final int nLoop=nTrain/thread;
+        long aveProcessTime=0,estimateTotalTime=0;int futureIndex=0;
+
         QTableDao qTableDao = QTableDao.getInstance();
 
         List<String> exportingData = new ArrayList<>();
@@ -84,50 +87,54 @@ public class TrainAgentRL implements Callable<List<String>> {
             ExecutorService executor = Executors.newFixedThreadPool(nThread);
             List<Future<List<String>>> futures = new ArrayList<>();
 
-
-            int totalTrain=episodes * nLoop;
             try {
-                for (int episode = 0; episode < episodes; episode++) {
-                    TrainAgentSL trainAgent = new TrainAgentSL(episode);
+                for (int episode = 0; episode < thread; episode++) {
+
+                    TrainAgentRL trainAgent = new TrainAgentRL();
                     Future<List<String>> future = executor.submit(trainAgent);
                     futures.add(future);
-                    System.out.print("Strating Thread: #"+episode+", ");
+                    System.out.print("Starting Thread: #"+episode+", ");
                     Thread.sleep(monitorCPUUsage());
                 }
-                long speed=0,time=0;
+
                 // Wait for all threads to finish
                 for (Future<List<String>> future : futures) {
-
+                    futureIndex++;
                     trainIndex++;
 
 
                     try {
 
                         System.out.println("Processing thread: " + Thread.currentThread().getId() + ", Index: " + trainIndex);
-
-                        System.out.print("Saving the game... ");
                         long startTimeThread = System.currentTimeMillis();
+                        System.out.print("Saving the game... ");
+
                         List<String> threadResult = future.get(5, TimeUnit.SECONDS); // Set your timeout value
-                        long endTimeThread = System.currentTimeMillis();
-                        System.out.println("Thread execution time: " + (endTimeThread - startTimeThread) + "ms");
+
 
                         if (threadResult != null) {
                             Thread.sleep(monitorCPUUsage());
                             System.out.print("Thread adding data... ");
                             exportingData.addAll(threadResult);
                             System.out.println(future.state());
+                            long endTimeThread = System.currentTimeMillis();
+                            System.out.println("Thread execution time: " + (endTimeThread - startTimeThread) + "ms");
+
                         } else {
                             System.out.println("Thread result is null. Check the TrainAgent.train() method.");
-                                        }
+                        }
 
                         Thread.sleep(monitorCPUUsage());
-                        if (trainIndex < 2) {
-                            speed = System.currentTimeMillis() - startTime;
-                            time = speed * episodes;
+                        if(trainIndex%10==0){
+                            aveProcessTime = System.currentTimeMillis() - startTime;
+                            aveProcessTime/=10;
+                            startTime = System.currentTimeMillis();
                         }
-                        time -= speed;
-                        Duration totalTime = Duration.ofMillis(time);
-                        System.out.println("Estimate training time: " + formatDuration(totalTime) + " Completed: " + trainIndex + "/" + totalTrain);
+
+                        int remainTrain=nTrain-trainIndex;
+                        estimateTotalTime = (long) remainTrain * aveProcessTime;
+                        Duration totalTime = Duration.ofMillis(estimateTotalTime);
+                        System.out.println("Estimate training time: " + formatDuration(totalTime) + " Completed: " + trainIndex + "/" + nTrain);
 
                     } catch (InterruptedException | ExecutionException | TimeoutException e) {
                         e.printStackTrace();
@@ -142,9 +149,11 @@ public class TrainAgentRL implements Callable<List<String>> {
                 executor.shutdownNow(); // Shutdown the executor immediately in case of exceptions
             }
 
-
             System.out.print("exporting....");
-            qTableDao.exportCSV(exportingData,"Reinforce_Learning_policyNetwork.csv");
+            qTableDao.exportCSV(exportingData,"Supervised_Learning_policyNetwork.csv");
+
+            Duration totalTime = Duration.ofMillis( System.currentTimeMillis()-startTime);
+            System.out.println("Total execution time: " + formatDuration(totalTime));
 
         }
 

@@ -16,8 +16,8 @@ import java.util.Set;
 public class  ReinforceLearningAgentConnectFour  extends AbstractReinforceLearningAgent2D {
     int TotalReward;
 
-    public ReinforceLearningAgentConnectFour (Connect4Dto connect4dto) {
-        super(connect4dto);
+    public ReinforceLearningAgentConnectFour (Connect4Dto connect4dto, List<QTableDto> qTableDto) {
+        super(connect4dto,qTableDto);
         TotalReward=0;
     }
     @Override
@@ -61,22 +61,21 @@ return qTableDto;
     }
 
     @Override
-    public QTableDto ReinforceLearning() {//use multi-thread //if episodes=1 then vs human if not AI vs AI
-
-        QTableDto qTableDto=new QTableDto(Environment);
+    public QTableDto ReinforceLearning() {
+        QTableDto currentGame = new QTableDto(Environment);
         Environment.setActivePlayer(Connect4.PLAYER1);
         Environment.setTurn(0);
 
-        //USE AI
+        // USE AI
         resetBoard(Environment);
         do {
-            if(isGameOver(Environment)){
+            if (isGameOver(Environment)) {
                 Environment.setWinner(0);
                 break;
             }
-            //update environment/state
+            // update environment/state
             System.out.print("Player");
-            if (Environment.getActivePlayer() == Connect4.PLAYER1) {//switch player
+            if (Environment.getActivePlayer() == Connect4.PLAYER1) {// switch player
                 Environment.setActivePlayer(Connect4.PLAYER2);
                 Environment.setNonActivePlayer(Connect4.PLAYER1);
                 System.out.println("1's turn");
@@ -86,15 +85,15 @@ return qTableDto;
                 System.out.println("2's turn");
             }
 
-
             Environment.playerDrop(selectAction());
-            StringBuilder state=getState();
+            StringBuilder state = getState();
 
-            int action=Environment.getLocation(Environment.getCurrentTurn());
-            int currentTurn=connect4Dto.getGame().getCurrentTurn();
-            Set<Double> setOfRewards=QtableDto.getAllRewards(state.toString(),action);
+            int action = Environment.getLocation(Environment.getCurrentTurn());
+            int currentTurn = connect4Dto.getGame().getCurrentTurn();
 
-            if (QtableDto.hasNextState(currentTurn,state.toString())) {
+            Set<Double> setOfRewards = QtableDto.getAllRewards(state.toString(), action);
+
+            if (QtableDto.hasNextState(currentTurn, state.toString())) {
                 String nextState = QtableDto.getNextState(connect4Dto.getGame().getCurrentTurn(), state.toString());
                 for (Double reward : setOfRewards) {
                     // Update Q-value for each reward in the set
@@ -103,18 +102,23 @@ return qTableDto;
             }
 
             Environment.displayBoard();
-            if (Environment.winCheck()||Environment.getWinner()==0) {//check winner 1 or 2
+            if (Environment.winCheck() || Environment.getWinner() == 0) {// check winner 1 or 2
                 System.out.print("saving into qtableDto:");
-                qTableDto.addLine();
+                currentGame.addLine();
                 break;
-           }else{
+            } else {
                 System.out.print("saving into qtableDto:");
-                qTableDto.addLine();
+                currentGame.addLine();
             }
-        }while(!isGameOver(Environment));
+        } while (!isGameOver(Environment));
 
-return qTableDto;
+
+        return currentGame;
     }
+
+    // Add other necessary methods here...
+
+
 
     //trainAgent RL
     //take Dto as a list

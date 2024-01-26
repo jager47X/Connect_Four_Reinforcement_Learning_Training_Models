@@ -232,6 +232,9 @@ public class Connect4{
 
         public void resetBoard() {
           board.initializeBoard();
+          this.winner=-1;
+          this.totalRewardP1=0;
+          this.totalRewardP2=0;
         }
 
 

@@ -21,6 +21,21 @@ public class QTableDto extends BaseDto {
 
     }
 
+    double learningRate = 0.1;
+    double discountFactor = 0.9;
+    double minExplorationRate = 0.1;
+    double explorationDecay = 0.95;
+    double explorationRate=1-learningRate;
+
+
+    public double getExplorationRate() {
+        return explorationRate;
+    }
+
+    public void setExplorationRate(double explorationRate) {
+        this.explorationRate = explorationRate;
+    }
+
     public Set<Double> getAllRewards(String state, int action) {
         if (QTableDao.getInstance().getQTable().containsKey(state)) {
             Set<QEntry> qEntrySet = QTableDao.getInstance().getQTable().get(state);

@@ -20,12 +20,10 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 public class TrainAgentSL implements Callable<List<String>> {
-        int trainNum;
+    List<QTableDto> QTableDtoList;
     private final Lock agentLock = new ReentrantLock();
     private static long startTime = System.currentTimeMillis();
-        public TrainAgentSL(int trainNum) {
-            this.trainNum = trainNum;
-        }
+
 
         @Override
         public List<String> call() {
@@ -36,7 +34,7 @@ public class TrainAgentSL implements Callable<List<String>> {
         private List<String> train() {
             Connect4 game = new Connect4();
             Connect4Dto connect4Dto = new Connect4Dto(game);
-            ReinforceLearningAgentConnectFour agent = new ReinforceLearningAgentConnectFour(connect4Dto);
+            ReinforceLearningAgentConnectFour agent = new ReinforceLearningAgentConnectFour(connect4Dto, QTableDtoList);
 
 
             if (agentLock.tryLock()) {
@@ -90,7 +88,7 @@ public class TrainAgentSL implements Callable<List<String>> {
        try {
             for (int episode = 0; episode < thread; episode++) {
 
-                TrainAgentSL trainAgent = new TrainAgentSL(episode);
+                TrainAgentRL trainAgent = new TrainAgentRL();
                 Future<List<String>> future = executor.submit(trainAgent);
                 futures.add(future);
                 System.out.print("Starting Thread: #"+episode+", ");
