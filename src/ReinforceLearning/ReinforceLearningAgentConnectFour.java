@@ -7,30 +7,31 @@ import dto.QTableDto;
 import target.Connect4;
 import target.RuleBasedAI;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
-public class  ReinforceLearningAgentConnectFour  extends AbstractReinforceLearningAgent2D {
+public class  ReinforceLearningAgentConnectFour extends AbstractReinforceLearningAgent2D {
     int TotalReward;
 
-    public ReinforceLearningAgentConnectFour (Connect4Dto connect4dto, List<QTableDto> qTableDto) {
-        super(connect4dto,qTableDto);
+    public ReinforceLearningAgentConnectFour (Connect4Dto connect4dto,QTableDto importedQTable) {
+        super(connect4dto,importedQTable);
         TotalReward=0;
     }
-    @Override
+
+    public ReinforceLearningAgentConnectFour (Connect4Dto connect4dto) {
+        super(connect4dto);
+        TotalReward=0;
+    }
+
     public QTableDto SupervisedLearning() {//use multi-thread //if episodes=1 then vs human if not AI vs AI
 
-        QTableDto qTableDto=new QTableDto(Environment);
+        QTableDto episode=new QTableDto(Environment);
         Environment.setActivePlayer(Connect4.PLAYER2);
         Environment.setTurn(0);
 
-        //USE AI
-        resetBoard(Environment);
+
         do {
-            if(isGameOver(Environment)){
+            if(isTerminateState(Environment)){
                 Environment.setWinner(0);
                 break;
             }
@@ -49,27 +50,27 @@ public class  ReinforceLearningAgentConnectFour  extends AbstractReinforceLearni
             }
             // calculateReward(board.getGame(),);
             if (Environment.winCheck()||Environment.getWinner()==0) {//check winner 1 or 2
-                qTableDto.addLine();
+                episode.addLine();
                 break;
             }else{
-                qTableDto.addLine();
+                episode.addLine();
             }
-        }while(!isGameOver(Environment));
+        }while(!isTerminateState(Environment));
 
 
-return qTableDto;
+    return QTable.converge(episode);
+
     }
 
-    @Override
+
     public QTableDto ReinforceLearning() {
-        QTableDto currentGame = new QTableDto(Environment);
+        QTableDto episode = new QTableDto(Environment);
         Environment.setActivePlayer(Connect4.PLAYER1);
         Environment.setTurn(0);
 
-        // USE AI
-        resetBoard(Environment);
+
         do {
-            if (isGameOver(Environment)) {
+            if (isTerminateState(Environment)) {
                 Environment.setWinner(0);
                 break;
             }
@@ -87,81 +88,38 @@ return qTableDto;
 
             Environment.playerDrop(selectAction());
             StringBuilder state = getState();
-
-            int action = Environment.getLocation(Environment.getCurrentTurn());
             int currentTurn = connect4Dto.getGame().getCurrentTurn();
 
-            Set<Double> setOfRewards = QtableDto.getAllRewards(state.toString(), action);
-
-            if (QtableDto.hasNextState(currentTurn, state.toString())) {
-                String nextState = QtableDto.getNextState(connect4Dto.getGame().getCurrentTurn(), state.toString());
-                for (Double reward : setOfRewards) {
-                    // Update Q-value for each reward in the set
-                    updateQValue(state.toString(), action, reward, nextState);
+            if (QTable.hasNextState(currentTurn, state.toString())) {
+                String nextState = QTable.getNextState(connect4Dto.getGame().getCurrentTurn(), state.toString());
+                int action = Environment.getLocation(Environment.getCurrentTurn());
+                double reward=0.0;
+                if(Environment.getActivePlayer()==Connect4.PLAYER1){
+                     reward= Environment.getTotalRewardP1();
+                }else {
+                    reward = Environment.getTotalRewardP2();
                 }
+                updateQValue(state.toString(), action, reward, nextState);//update to RL Qtable
+                
             }
 
             Environment.displayBoard();
             if (Environment.winCheck() || Environment.getWinner() == 0) {// check winner 1 or 2
                 System.out.print("saving into qtableDto:");
-                currentGame.addLine();
+                episode.addLine();
                 break;
             } else {
                 System.out.print("saving into qtableDto:");
-                currentGame.addLine();
+                episode.addLine();
             }
-        } while (!isGameOver(Environment));
+        } while (!isTerminateState(Environment));
 
 
-        return currentGame;
+        return QTable.converge(episode);
     }
 
-    // Add other necessary methods here...
-
-
-
-    //trainAgent RL
-    //take Dto as a list
-    //after take dto as list reset environment
-    //while (back to take dto)
-    //export at once
-
-    public void resetBoard(Connect4 game) {
-        game.resetBoard();
-    }
-
-
-    private boolean isGameOver(Connect4 game) {
+    private boolean isTerminateState(Connect4 game) {
         return game.getWinner() != -1;
-    }
-
-
-    @Override
-    public int[] getLegalActions() {//not =-6
-        List<Integer> legalActionsList = new ArrayList<>();
-// Iterate over each column to check if it's a legal action
-            for (int col = 0; col < Environment.getCOLS_SIZE(); col++) {
-                if (Environment.isValidColumn(col)) {
-                    legalActionsList.add(col+1);
-                }
-            }
-
-        // Convert the list of legal actions to an array
-        int[] legalActions = new int[legalActionsList.size()];
-        for (int i = 0; i < legalActions.length; i++) {
-            legalActions[i] = legalActionsList.get(i);
-        }
-        System.out.println("legal action:"+ Arrays.toString(legalActions));
-        return legalActions;
-    }
-
-
-
-
-
-    @Override
-    public int selectAction() {
-        return super.selectAction();
     }
 
 
