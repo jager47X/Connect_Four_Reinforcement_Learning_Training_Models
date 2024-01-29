@@ -1,8 +1,7 @@
-package TrainAgent.prototype;
+package TrainAgent;
 
 import Connect4.Connect4;
 import ReinforceLearning.ReinforceLearningAgentConnectFour;
-import TrainAgent.prototype.LearningAgent;
 import dto.Connect4Dto;
 import dto.QTableDto;
 
@@ -11,12 +10,12 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Supervised_Learning implements LearningAgent {
+public class Reinforce_Learning implements LearningAgent {
     private final Lock agentLock = new ReentrantLock();
     private final Connect4 game;
 
     private QTableDto Qtable;
-    public Supervised_Learning(QTableDto qTableDto) {
+    public Reinforce_Learning(QTableDto qTableDto) {
         game=new Connect4();
         this.Qtable = qTableDto != null ? qTableDto : new QTableDto();
     }
@@ -50,7 +49,7 @@ public class Supervised_Learning implements LearningAgent {
     private List<String> convertQTableDtoToList(QTableDto qTableDto) {
         // Your conversion logic from QTableDto to List<String>
         // Replace this with the actual conversion logic
-        return new ArrayList<>();
+        return qTableDto.getHashedData();
     }
 
     @Override

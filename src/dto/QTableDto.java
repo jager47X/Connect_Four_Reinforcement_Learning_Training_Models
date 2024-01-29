@@ -269,14 +269,18 @@ public class QTableDto extends BaseDto {
     public String getNextState(int currentTurn, String state) {
         int nextTurn = currentTurn + 1;
 
-        for (List<String> importedGame : BaseDao.getImportedGames()) {
-            if(importedGame.size()-1>currentTurn){
-                if ((importedGame.get(currentTurn).contains(state))&&importedGame.size()-1>nextTurn) {
-                    return importedGame.get(nextTurn);
+        List<List<String>> importedGames = BaseDao.getImportedGames();
+
+        for (List<String> importedGame : importedGames) {
+            if (importedGame.size() > nextTurn) {
+                String currentState = importedGame.get(currentTurn);
+                String nextState = importedGame.get(nextTurn);
+
+                if (currentState.contains(state)) {
+                    return nextState;
                 }
             }
-
         }
-        return "ERROR";
+        return "NULL";
     }
 }

@@ -1,4 +1,4 @@
-package TrainAgent.prototype;
+package TrainAgent;
 
 import ReinforceLearning.ReinforceLearningAgentConnectFour;
 import dto.Connect4Dto;

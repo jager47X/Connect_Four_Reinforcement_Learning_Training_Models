@@ -86,7 +86,7 @@ public class  ReinforceLearningAgentConnectFour extends AbstractReinforceLearnin
             String state=stateString.toString();
             int currentTurn = connect4Dto.getGame().getCurrentTurn();
             String nextState = QTable.getNextState(currentTurn, state);
-             QTable.hasNextState=!Objects.equals(nextState, "ERROR");
+             QTable.hasNextState=!Objects.equals(nextState, "NULL");
             if (QTable.hasNextState) {
                 int action = Environment.getLocation(Environment.getCurrentTurn());
                 double reward=0.0;

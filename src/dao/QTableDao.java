@@ -17,19 +17,11 @@ public class QTableDao extends BaseDao {
     List <List<Double>> rewardList;
 
 
-    public String getImportingModel() {
-        return importingModel;
-    }
-
-    public void setImportingModel(String importingModel) {
-        this.importingModel = importingModel;
-    }
-
     public Map<String, Set<QEntry>> getImportedMap() {
         return importedMap;
     }
 
-    String importingModel ="Supervised_Learning_policyNetwork.csv";
+    String importingModel ="TEST_Supervised_Learning_policyNetwork.csv";
 
     public static QTableDao getInstance() {
         if (instance != null) {

@@ -1,8 +1,7 @@
-package TrainAgent.prototype;
+package TrainAgent;
 
 import Connect4.Connect4;
 import ReinforceLearning.ReinforceLearningAgentConnectFour;
-import TrainAgent.prototype.LearningAgent;
 import dto.Connect4Dto;
 import dto.QTableDto;
 
@@ -11,15 +10,15 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Reinforce_Learning implements LearningAgent {
+public class Supervised_Learning implements LearningAgent {
     private final Lock agentLock = new ReentrantLock();
     private final Connect4 game;
-    private QTableDto Qtable ;
 
-    public Reinforce_Learning() {
-        this.game = new Connect4();
+    private QTableDto Qtable;
+    public Supervised_Learning(QTableDto qTableDto) {
+        game=new Connect4();
+        this.Qtable = qTableDto != null ? qTableDto : new QTableDto();
     }
-
     @Override
     public List<String> train() {
         Connect4Dto connect4Dto = new Connect4Dto(game);
@@ -27,7 +26,7 @@ public class Reinforce_Learning implements LearningAgent {
 
         if (agentLock.tryLock()) {
             try {
-                Qtable = agent.ReinforceLearning();
+                Qtable = agent.SupervisedLearning();
 
                 if (Qtable.getHashedData() == null || Qtable.getHashedData().isEmpty()) {
                     System.out.println("Thread " + Thread.currentThread().getId() + ": Warning - hashedData is null or empty.");
@@ -50,7 +49,7 @@ public class Reinforce_Learning implements LearningAgent {
     private List<String> convertQTableDtoToList(QTableDto qTableDto) {
         // Your conversion logic from QTableDto to List<String>
         // Replace this with the actual conversion logic
-        return new ArrayList<>();
+        return qTableDto.getHashedData();
     }
 
     @Override

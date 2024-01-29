@@ -1,8 +1,7 @@
-package TrainAgent.prototype;
+package TrainAgent;
 
 import java.util.concurrent.ExecutionException;
 
-import TrainAgent.prototype.Supervised_Learning;
 import com.sun.management.OperatingSystemMXBean;
 import dao.BaseDao;
 import dao.QTableDao;
@@ -21,12 +20,12 @@ public class TrainAgent {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
 
-        final int thread = 20;
-        final int nTrain = 100;
+        final int thread = 200;
+        final int nTrain = 40;
         final int nLoop = nTrain / thread;
 
         QTableDao qTableDao = QTableDao.getInstance();
-        qTableDao.setImportingModel("TEST_Supervised_Learning_policyNetwork.csv");
+
 
         // Initialize Qtable in TrainAgent
         QTableDto qTableDto = new QTableDto();
@@ -45,7 +44,7 @@ public class TrainAgent {
             try {
                 for (int episode = 0; episode < thread; episode++) {
                     // Pass QTableDto to Supervised_Learning constructor
-                    Supervised_Learning trainAgent = new Supervised_Learning(qTableDto);
+                    Supervised_Learning trainAgent = new  Supervised_Learning(qTableDto);
                     Future<List<String>> future = executor.submit(trainAgent);
                     futures.add(future);
                     System.out.print("Starting Thread: #" + episode + ", ");
@@ -86,10 +85,10 @@ public class TrainAgent {
                 }
             }
 
-            System.out.print("Exporting....");
-            qTableDao.exportCSV(exportingData, "TEST_Supervised_Learning_policyNetwork.csv");
         }
 
+        System.out.print("Exporting....");
+        qTableDao.exportCSV(exportingData, "TEST_Supervised_Learning_policyNetwork.csv");
 
         Duration totalTime = Duration.ofMillis(System.currentTimeMillis() - startTime);
         System.out.println("Total execution time: " + formatDuration(totalTime));
