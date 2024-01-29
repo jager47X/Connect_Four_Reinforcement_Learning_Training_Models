@@ -1,10 +1,9 @@
 package ReinforceLearning;
 
-import dao.QEntry;
-import dao.QTableDao;
+import dto.QEntry;
 import dto.Connect4Dto;
 import dto.QTableDto;
-import target.Connect4;
+import Connect4.Connect4;
 
 import java.util.*;
 
@@ -105,7 +104,10 @@ public abstract class AbstractReinforceLearningAgent2D {
 
     public void updateQValue(String state, int action, double immediateReward, String nextState) {
 
-        Map<Integer, Double> currentQValues = QTable.getQValues(state,action);
+        if(QTable.isQValueAbsent(state,action)){
+            QTable.setQEntry(action,immediateReward,state);
+        }
+        Map<Integer, Double>  currentQValues= QTable.getQValues(state,action);
 
         // Ensure that the action is present in the Q-values map
         if (currentQValues.containsKey(action)) {

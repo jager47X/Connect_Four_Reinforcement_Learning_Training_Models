@@ -1,8 +1,8 @@
 package dto;
 
 
-import target.Board;
-import target.Connect4;
+import Connect4.Board;
+import Connect4.Connect4;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,15 +72,11 @@ public abstract class BaseDto {
         state.append("L");
         state.append(location);
 
-        String winner = Integer.toString(game.getWinner());
-        state.append("W");
-        state.append(winner);
-
-        String reward;
+        double reward;
         if(game.getActivePlayer()==Connect4.PLAYER1){
-             reward = Integer.toString(game.getTotalRewardP1());
+             reward = game.getTotalRewardP1();
         }else{
-            reward = Integer.toString(game.getTotalRewardP2());
+            reward = game.getTotalRewardP2();
         }
         state.append("R");
         state.append(reward);

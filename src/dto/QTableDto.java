@@ -1,9 +1,8 @@
 package dto;
 
 import dao.BaseDao;
-import dao.QEntry;
 import dao.QTableDao;
-import target.Connect4;
+import Connect4.Connect4;
 
 
 import java.util.*;
@@ -34,11 +33,19 @@ public class QTableDto extends BaseDto {
         this.explorationRate= imported.explorationRate;
         ExportingPolicyNetWork =imported.ExportingPolicyNetWork;
         ImportedPolicyNetWork =QTableDao.getInstance().getImportedMap();
-
     }
     private Map<String, Set<QEntry>> ExportingPolicyNetWork;
     private Map<String, Set<QEntry>> ImportedPolicyNetWork;
 
+    public boolean hasNextState;
+
+    public Map<String, Set<QEntry>> getImportedPolicyNetWork() {
+        return ImportedPolicyNetWork;
+    }
+
+    public void setImportedPolicyNetWork(Map<String, Set<QEntry>> importedPolicyNetWork) {
+        ImportedPolicyNetWork = importedPolicyNetWork;
+    }
 
     double learningRate;
     double discountFactor;
@@ -96,9 +103,9 @@ public class QTableDto extends BaseDto {
         }
         return Collections.emptySet(); // or null
     }
-    public  void toQtable(List<String> moves) {
+    public synchronized void toQtable(List<String> moves) {
 
-
+        setHashedData(moves);
         // Create new instances of location and reward lists for each game iteration
         List<Integer> location = new ArrayList<>();
         List<Double> reward = new ArrayList<>();
@@ -129,38 +136,36 @@ public class QTableDto extends BaseDto {
                     }
 
                     int currentTurn=turn+1;
-                    System.out.println("turn:"+currentTurn);
-                    System.out.println("current Qtable:Saving state:"+state);
-                    System.out.println("current Qtable:Saving action:"+action+", reward:"+qvalue);
+               //     System.out.println("turn:"+currentTurn);
+               //     System.out.println("current Qtable:Saving state:"+state);
+                //    System.out.println("current Qtable:Saving action:"+action+", reward:"+qvalue);
                     updateQTable(state.toString(),  action, qvalue);
                 }
     }
 
-    public  void updateQTable(String state, int action, double qvalue) {
+    public synchronized void updateQTable(String state, int action, double qvalue) {
         QEntry qEntry = new QEntry(action, qvalue);
 
         Set<QEntry> qEntrySet = ImportedPolicyNetWork.computeIfAbsent(state, k -> new HashSet<>());
 
-        // Check if an entry with the same action already exists
-        boolean containsAction = qEntrySet.stream()
-                .anyMatch(entry -> entry.getAction().contains(action));
-
-        if (containsAction) {
-            // Entry with the same action exists, update it if needed
-            qEntrySet.forEach(entry -> {
-                if (entry.getAction().contains(action)) {
-                    entry.setQValue(action, qvalue);
-                }
-            });
-        } else {
-            // Entry with the same action doesn't exist, add the new QEntry
-            qEntrySet.add(qEntry);
+        // Use iterator to avoid ConcurrentModificationException
+        Iterator<QEntry> iterator = qEntrySet.iterator();
+        while (iterator.hasNext()) {
+            QEntry entry = iterator.next();
+            if (entry.getAction().contains(action)) {
+                iterator.remove(); // Remove the existing entry
+            }
         }
+
+        // Add the new QEntry
+        qEntrySet.add(qEntry);
     }
+
+
 
     private  int addLocation(String move) {
         int location=0;
-        Pattern pattern = Pattern.compile("P([012])L(\\d+)W(-?\\d+)R(\\d+)");
+        Pattern pattern = Pattern.compile("P([012])L(\\d+)R(\\d+\\.\\d+)");
         Matcher matcher = pattern.matcher(move);
         if (matcher.matches()) {
             location=Integer.parseInt(matcher.group(2));
@@ -169,10 +174,10 @@ public class QTableDto extends BaseDto {
     }
     private  double addReward(String move) {
         double reward=0.0;
-        Pattern pattern = Pattern.compile("P([012])L(\\d+)W(-?\\d+)R(\\d+)");
+        Pattern pattern = Pattern.compile("P([012])L(\\d+)R(\\d+\\.\\d+)");
         Matcher matcher = pattern.matcher(move);
         if (matcher.matches()) {
-            reward=Double.parseDouble(matcher.group(4));
+            reward=Double.parseDouble(matcher.group(3));
         }
 
         return reward;
@@ -203,10 +208,9 @@ public class QTableDto extends BaseDto {
     }
 
     public void setQEntry(int action, double newQValue, String state) {
-        if (ImportedPolicyNetWork.containsKey(state)) {
-            ImportedPolicyNetWork.get(state).add(new QEntry(action, newQValue));
-        }
+        ImportedPolicyNetWork.computeIfAbsent(state, key -> new HashSet<>()).add(new QEntry(action, newQValue));
     }
+
 
 
     // Get the maximum Q-value for a given state
@@ -222,10 +226,21 @@ public class QTableDto extends BaseDto {
 
     // Get the Q-value for a state-action pair
     public Map<Integer, Double> getQValues(String state, int action) {
-        Set<QEntry> qEntrySet = ImportedPolicyNetWork.getOrDefault(state, Set.of(new QEntry()));
+        Set<QEntry> qEntrySet = ImportedPolicyNetWork.computeIfAbsent(state, key -> Collections.emptySet());
 
         return qEntrySet.stream()
-                .collect(Collectors.toMap(qEntry -> qEntry.getAction().iterator().next(), qEntry -> qEntry.getQValue(action)));
+                .filter(qEntry -> !qEntry.getAction().isEmpty())
+                .collect(Collectors.toMap(
+                        qEntry -> qEntry.getAction().iterator().next(),
+                        qEntry -> qEntry.getQValue(action)
+                ));
+    }
+
+    public boolean isQValueAbsent(String state, int action) {
+        Set<QEntry> qEntrySet = ImportedPolicyNetWork.getOrDefault(state, Collections.emptySet());
+
+        return qEntrySet.stream()
+                .noneMatch(qEntry -> qEntry.getAction().contains(action));
     }
 
     public void updateQValue(String state, int action, double updatedQValue) {
@@ -235,7 +250,7 @@ public class QTableDto extends BaseDto {
             // Iterate through the set to find the QEntry with the matching action
             for (QEntry qEntry : qTableEntry) {
                 if (qEntry.getQEntry().containsKey(action)) {
-                    qEntry.setQValue(action, updatedQValue);
+                    qEntry.updateQEntry(action,updatedQValue);
                     //  may need to put the updated QEntry back into the set
                     // qTableEntry.remove(qEntry);
                     // qTableEntry.add(qEntry);
@@ -249,17 +264,18 @@ public class QTableDto extends BaseDto {
     }
 
 
-    public boolean hasNextState(int currentTurn, String state) {
-        int nextTurn = currentTurn + 1;
-        return !getNextState(currentTurn, state).equals("ERROR");
-    }
+
 
     public String getNextState(int currentTurn, String state) {
         int nextTurn = currentTurn + 1;
+
         for (List<String> importedGame : BaseDao.getImportedGames()) {
-            if ((importedGame.get(currentTurn).contains(state))) {
-                return importedGame.get(nextTurn);
+            if(importedGame.size()-1>currentTurn){
+                if ((importedGame.get(currentTurn).contains(state))&&importedGame.size()-1>nextTurn) {
+                    return importedGame.get(nextTurn);
+                }
             }
+
         }
         return "ERROR";
     }

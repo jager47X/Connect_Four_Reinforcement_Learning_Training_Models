@@ -4,8 +4,8 @@ package ReinforceLearning;
 
 import dto.Connect4Dto;
 import dto.QTableDto;
-import target.Connect4;
-import target.RuleBasedAI;
+import Connect4.Connect4;
+import Connect4.RuleBasedAI;
 
 import java.util.*;
 
@@ -38,16 +38,11 @@ public class  ReinforceLearningAgentConnectFour extends AbstractReinforceLearnin
             //update environment/state
             Environment = connect4Dto.getGame();
 
-            if (Environment.getActivePlayer() == Connect4.PLAYER1) {//switch player
-                Environment.setActivePlayer(Connect4.PLAYER2);
-                Environment.setNonActivePlayer(Connect4.PLAYER1);
-            } else {
-                Environment.setActivePlayer(Connect4.PLAYER1);
-                Environment.setNonActivePlayer(Connect4.PLAYER2);
-            }
+            switchPlayer();
             while(!Environment.playerDrop(RuleBasedAI.makeMove(Environment.getBoard(),Environment.getActivePlayer(),Environment.getNonActivePlayer()))) {//update move
                 Environment.playerDrop(RuleBasedAI.makeMove(Environment.getBoard(),Environment.getActivePlayer(),Environment.getNonActivePlayer()));
             }
+
             // calculateReward(board.getGame(),);
             if (Environment.winCheck()||Environment.getWinner()==0) {//check winner 1 or 2
                 episode.addLine();
@@ -61,7 +56,16 @@ public class  ReinforceLearningAgentConnectFour extends AbstractReinforceLearnin
     return QTable.converge(episode);
 
     }
+    private void switchPlayer(){
+        if (Environment.getActivePlayer() == Connect4.PLAYER1) {//switch player
+            Environment.setActivePlayer(Connect4.PLAYER2);
+            Environment.setNonActivePlayer(Connect4.PLAYER1);
+        } else {
+            Environment.setActivePlayer(Connect4.PLAYER1);
+            Environment.setNonActivePlayer(Connect4.PLAYER2);
+        }
 
+    }
 
     public QTableDto ReinforceLearning() {
         QTableDto episode = new QTableDto(Environment);
@@ -75,31 +79,23 @@ public class  ReinforceLearningAgentConnectFour extends AbstractReinforceLearnin
                 break;
             }
             // update environment/state
-            System.out.print("Player");
-            if (Environment.getActivePlayer() == Connect4.PLAYER1) {// switch player
-                Environment.setActivePlayer(Connect4.PLAYER2);
-                Environment.setNonActivePlayer(Connect4.PLAYER1);
-                System.out.println("1's turn");
-            } else {
-                Environment.setActivePlayer(Connect4.PLAYER1);
-                Environment.setNonActivePlayer(Connect4.PLAYER2);
-                System.out.println("2's turn");
-            }
+            switchPlayer();
 
             Environment.playerDrop(selectAction());
-            StringBuilder state = getState();
+            StringBuilder stateString = getState();
+            String state=stateString.toString();
             int currentTurn = connect4Dto.getGame().getCurrentTurn();
-
-            if (QTable.hasNextState(currentTurn, state.toString())) {
-                String nextState = QTable.getNextState(connect4Dto.getGame().getCurrentTurn(), state.toString());
+            String nextState = QTable.getNextState(currentTurn, state);
+             QTable.hasNextState=!Objects.equals(nextState, "ERROR");
+            if (QTable.hasNextState) {
                 int action = Environment.getLocation(Environment.getCurrentTurn());
                 double reward=0.0;
-                if(Environment.getActivePlayer()==Connect4.PLAYER1){
-                     reward= Environment.getTotalRewardP1();
+                if(Environment.getActivePlayer()==Connect4.PLAYER1){//fliped
+                     reward= Environment.getTotalRewardP2();
                 }else {
-                    reward = Environment.getTotalRewardP2();
+                    reward = Environment.getTotalRewardP1();
                 }
-                updateQValue(state.toString(), action, reward, nextState);//update to RL Qtable
+                updateQValue(state, action, reward, nextState);//update to RL Qtable
                 
             }
 

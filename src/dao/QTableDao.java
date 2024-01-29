@@ -1,6 +1,8 @@
 package dao;
 
 
+import dto.QEntry;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,9 +16,14 @@ public class QTableDao extends BaseDao {
 
     List <List<Double>> rewardList;
 
-    int winner;
 
+    public String getImportingModel() {
+        return importingModel;
+    }
 
+    public void setImportingModel(String importingModel) {
+        this.importingModel = importingModel;
+    }
 
     public Map<String, Set<QEntry>> getImportedMap() {
         return importedMap;
@@ -83,27 +90,8 @@ public class QTableDao extends BaseDao {
                     int game=gameIndex+1;
                     int currentTurn=turn+1;
                     System.out.println("game:"+game+" turn:"+currentTurn);
-                    winner= parseWinner(ImportedGames.get(gameIndex).get(turn));
-/*
-                    if(turn%2==0){
-                        connect4.setActivePlayer(Connect4.PLAYER2);
-                        connect4.setNonActivePlayer(Connect4.PLAYER1);
-                    }else{
-                        connect4.setActivePlayer(Connect4.PLAYER1);
-                        connect4.setNonActivePlayer(Connect4.PLAYER2);
-                    }
 
-                    connect4.playerDrop(action);
-                    connect4.displayBoard();
 
-                    if(qvalue==64){
-                        if(turn%2==0){
-                            winner=2;
-                        }else {
-                            winner=1;
-                        }
-                        connect4=new Connect4();
-                    }*/
                     StringBuilder state = new StringBuilder( );
                     for (int index = 0; index < turn+1; index++) {//add up all action
                         if (index==0) {
@@ -117,7 +105,7 @@ public class QTableDao extends BaseDao {
                     }
 
                     System.out.println("Qtable:Saving state:"+state);
-                    System.out.println("Qtable:Saving action:"+action+", reward:"+ qvalue+", winner:"+winner);
+                    System.out.println("Qtable:Saving action:"+action+", reward:"+ qvalue);
                     updateQTable(state.toString(),  action, qvalue);
                 }
 
@@ -145,32 +133,22 @@ public class QTableDao extends BaseDao {
             qEntrySet.add(qEntry);
         }
     }
-    public int parseWinner(String move) {
-        int winner=-1;
-        System.out.println("reading move:"+move);
-        Pattern pattern = Pattern.compile("P([012])L(\\d+)W(-?\\d+)R(\\d+)");
+
+    public int addLocation(String move) {
+        int location = 0;
+        Pattern pattern = Pattern.compile("P([012])L(\\d+)R(\\d+\\.\\d+)");
         Matcher matcher = pattern.matcher(move);
         if (matcher.matches()) {
-          winner=Integer.parseInt(matcher.group(3));
-            //  System.out.println("Player: " + this.player + ", Location: " + this.location + ", Movement: " + this.winner + ", Reward: " + this.qValue);
+            location = Integer.parseInt(matcher.group(2));
         }
-        return winner;
-    }
-    public  int addLocation(String move) {
-    int location=0;
-        Pattern pattern = Pattern.compile("P([012])L(\\d+)W(-?\\d+)R(\\d+)");
-        Matcher matcher = pattern.matcher(move);
-        if (matcher.matches()) {
-            location=Integer.parseInt(matcher.group(2));
-           }
         return location;
     }
     public   double addReward(String move) {
        double reward=0.0;
-        Pattern pattern = Pattern.compile("P([012])L(\\d+)W(-?\\d+)R(\\d+)");
+        Pattern pattern = Pattern.compile("P([012])L(\\d+)R(\\d+\\.\\d+)");
         Matcher matcher = pattern.matcher(move);
         if (matcher.matches()) {
-            reward=Double.parseDouble(matcher.group(4));
+            reward=Double.parseDouble(matcher.group(3));
         }
 
         return reward;

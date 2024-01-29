@@ -7,12 +7,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
 public abstract class BaseDao {
 
 
 
-    protected static List<String> ImportedData=new ArrayList<>();
+    protected static List<String> ImportedGame =new ArrayList<>();
 
     protected static List<List<String>>  ImportedGames=new ArrayList<>();
 
@@ -42,8 +43,7 @@ public abstract class BaseDao {
 
             System.out.println("SUCCESS : IMPORTING" + csv.getModel());
         } catch (IOException e) {
-            System.err.println("ERROR : " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Making new File : " +fileName);
         }
 
     }
@@ -51,13 +51,15 @@ public abstract class BaseDao {
     public void exportCSV(List<String>  HashedData,String fileName) {
         CSV csv=new CSV(fileName);
         try (FileWriter writer = new FileWriter(csv.getModel())) {
-
+            int turn=0;
             for (String hashedLine :  HashedData) {//current game
                 writer.append(hashedLine);
-                if(hashedLine.contains("-1")){
+                if(!(hashedLine.contains("64")||turn>41)){
                     writer.append(",");
+                    turn++;
                 }else{
                     writer.append("\n");
+                    turn=0;
                 }
                 // Add a newline after each line
             }
@@ -69,18 +71,30 @@ public abstract class BaseDao {
     }
 
     protected int processCSVLine(String line,int gameSet) {
-        gameSet++;
+        boolean duplicate = false;
         String[] data =line.split(",");//game 1 2 3
             System.out.println("new game");
-            ImportedData.clear();
+            ImportedGame.clear();
 
         for (int i = 0; i < data.length; i++) {
-            ImportedData.add(i,data[i]);
+            ImportedGame.add(i,data[i]);
         }
-        List<String> importedGame=new ArrayList<>(ImportedData);
-        ImportedGames.add(importedGame);
+        for (List<String> existingGame : ImportedGames) {
+            duplicate = Arrays.equals(existingGame.toArray(), ImportedGame.toArray());
+            if (duplicate) {
+                System.out.println("Optimized Duplicate line");
+                break; // No need to continue checking if already found a duplicate
+            }
+        }
 
-       System.out.println("data"+Arrays.toString(data));
+        if(!duplicate){
+            List<String> importedGame=new ArrayList<>(ImportedGame);
+            ImportedGames.add(importedGame);
+            System.out.println("data"+Arrays.toString(data));
+            gameSet++;
+        }
+
+
         return  gameSet;
     }
 

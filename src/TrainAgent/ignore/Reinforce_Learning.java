@@ -1,4 +1,4 @@
-package Test;
+package TrainAgent.ignore;
 
 import ReinforceLearning.ReinforceLearningAgentConnectFour;
 import com.sun.management.OperatingSystemMXBean;
@@ -6,7 +6,7 @@ import dao.BaseDao;
 import dao.QTableDao;
 import dto.Connect4Dto;
 import dto.QTableDto;
-import target.Connect4;
+import Connect4.Connect4;
 
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
@@ -19,7 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 
-public class TrainAgentRL implements Callable<List<String>> {
+public class Reinforce_Learning implements Callable<List<String>> {
 
     QTableDto Qtable=new QTableDto();
     private final Lock agentLock = new ReentrantLock();
@@ -44,10 +44,10 @@ public class TrainAgentRL implements Callable<List<String>> {
                 Qtable = agent.ReinforceLearning();
 
                 if (Qtable.getHashedData() == null || Qtable.getHashedData().isEmpty()) {
-                    //           System.out.println("Thread " + Thread.currentThread().getId() + ": Warning - hashedData is null or empty.");
+                    System.out.println("Thread " + Thread.currentThread().getId() + ": Warning - hashedData is null or empty.");
                     return new ArrayList<>();
                 } else {
-                    //           System.out.println("Thread " + Thread.currentThread().getId() + ": hashedData is " + Qtable.getHashedData());
+                    System.out.println("Thread " + Thread.currentThread().getId() + ": hashedData is " + Qtable.getHashedData());
                 }
 
                 return Qtable.getHashedData();
@@ -64,11 +64,10 @@ public class TrainAgentRL implements Callable<List<String>> {
 
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        int thread =2000; // Adjust
-        final int nThread=2000;
-        final int nTrain=1000000;
+        final int thread =20; // Adjust
+        final int nTrain=100;
         final int nLoop=nTrain/thread;
-        long aveProcessTime=0,estimateTotalTime=0;int futureIndex=0;
+
 
         QTableDao qTableDao = QTableDao.getInstance();
 
@@ -81,25 +80,24 @@ public class TrainAgentRL implements Callable<List<String>> {
         }
         int trainIndex=0;
         for (int i = 0; i < nLoop; i++) {
-            Thread.sleep(2000);
+
             // Import game once
 
-            ExecutorService executor = Executors.newFixedThreadPool(nThread);
+            ExecutorService executor = Executors.newFixedThreadPool(thread);
             List<Future<List<String>>> futures = new ArrayList<>();
 
             try {
                 for (int episode = 0; episode < thread; episode++) {
 
-                    TrainAgentRL trainAgent = new TrainAgentRL();
+                    Reinforce_Learning trainAgent = new Reinforce_Learning();
                     Future<List<String>> future = executor.submit(trainAgent);
                     futures.add(future);
                     System.out.print("Starting Thread: #"+episode+", ");
-                    Thread.sleep(monitorCPUUsage());
+
                 }
 
                 // Wait for all threads to finish
                 for (Future<List<String>> future : futures) {
-                    futureIndex++;
                     trainIndex++;
 
 
@@ -113,7 +111,7 @@ public class TrainAgentRL implements Callable<List<String>> {
 
 
                         if (threadResult != null) {
-                            Thread.sleep(monitorCPUUsage());
+
                             System.out.print("Thread adding data... ");
                             exportingData.addAll(threadResult);
                             System.out.println(future.state());
@@ -124,17 +122,9 @@ public class TrainAgentRL implements Callable<List<String>> {
                             System.out.println("Thread result is null. Check the TrainAgent.train() method.");
                         }
 
-                        Thread.sleep(monitorCPUUsage());
-                        if(trainIndex%10==0){
-                            aveProcessTime = System.currentTimeMillis() - startTime;
-                            aveProcessTime/=10;
-                            startTime = System.currentTimeMillis();
-                        }
 
-                        int remainTrain=nTrain-trainIndex;
-                        estimateTotalTime = (long) remainTrain * aveProcessTime;
-                        Duration totalTime = Duration.ofMillis(estimateTotalTime);
-                        System.out.println("Estimate training time: " + formatDuration(totalTime) + " Completed: " + trainIndex + "/" + nTrain);
+                        monitorCPUUsage();
+                        System.out.println(" Completed: " + trainIndex + "/" + nTrain);
 
                     } catch (InterruptedException | ExecutionException | TimeoutException e) {
                         e.printStackTrace();
@@ -147,17 +137,28 @@ public class TrainAgentRL implements Callable<List<String>> {
                 }
             } finally {
                 executor.shutdownNow(); // Shutdown the executor immediately in case of exceptions
+                try {
+                    if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                        executor.shutdownNow(); // Forceful shutdown if necessary
+                    }
+                } catch (InterruptedException e) {
+                    executor.shutdownNow(); // Handle interruption
+                    Thread.currentThread().interrupt(); // Preserve the interrupted status
+                }
             }
 
-            System.out.print("exporting....");
-            qTableDao.exportCSV(exportingData,"Supervised_Learning_policyNetwork.csv");
-
-            Duration totalTime = Duration.ofMillis( System.currentTimeMillis()-startTime);
-            System.out.println("Total execution time: " + formatDuration(totalTime));
 
         }
+        System.out.print("exporting....");
+        qTableDao.exportCSV(exportingData,"Supervised_Learning_policyNetwork.csv");
+
+        Duration totalTime = Duration.ofMillis( System.currentTimeMillis()-startTime);
+        System.out.println("Total execution time: " + formatDuration(totalTime));
+
 
     }
+
+
 
     private static long monitorCPUUsage() {
         OperatingSystemMXBean osBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
