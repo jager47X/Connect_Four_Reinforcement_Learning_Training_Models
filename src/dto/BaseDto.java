@@ -1,8 +1,8 @@
 package dto;
 
 
-import Connect4.Board;
-import Connect4.Connect4;
+import GameEnviroment.Board;
+import GameEnviroment.Connect4;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package Connect4;
+package GameEnviroment;
 
 public class Board {
 

@@ -1,8 +1,8 @@
 package Test;
 
-import Connect4.Connect4;
-import Connect4.RuleBasedAI;
-import Connect4.Board;
+import GameEnviroment.Connect4;
+import GameEnviroment.RuleBasedAI;
+import GameEnviroment.Board;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

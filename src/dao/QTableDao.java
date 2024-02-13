@@ -21,7 +21,8 @@ public class QTableDao extends BaseDao {
         return importedMap;
     }
 
-    String importingModel ="TEST_Supervised_Learning_policyNetwork.csv";
+    String importingModel ="Supervised_Learning_policyNetwork.csv";
+    final int MAX_IMPORTING_GAMES =80000;//about 8GB of RAM USAGE
 
     public static QTableDao getInstance() {
         if (instance != null) {
@@ -30,9 +31,9 @@ public class QTableDao extends BaseDao {
         instance = new QTableDao();
         return instance;
     }
-    public QTableDao() {
+    private QTableDao() {
         super();
-        import_CSV(importingModel);// Import QTable from CSV
+        import_CSV(importingModel, MAX_IMPORTING_GAMES);// Import QTable from CSV
         importedMap = new HashMap<>();
         locationList=new ArrayList<>();
         rewardList=new ArrayList<>();
@@ -41,6 +42,7 @@ public class QTableDao extends BaseDao {
 
 
     public  void importSLNetWork() {
+        System.out.println("About to Start importing.");
         // Load all into List location and reward
 // Load all into List location and reward
         if (ImportedGames != null) {

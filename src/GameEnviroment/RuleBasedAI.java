@@ -1,4 +1,4 @@
-package Connect4;
+package GameEnviroment;
 
 import java.util.Random;
 

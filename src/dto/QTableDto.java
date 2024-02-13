@@ -2,7 +2,7 @@ package dto;
 
 import dao.BaseDao;
 import dao.QTableDao;
-import Connect4.Connect4;
+import GameEnviroment.Connect4;
 
 
 import java.util.*;
@@ -11,9 +11,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class QTableDto extends BaseDto {
-    public QTableDto(Connect4 game) {//CSV to dto
-        super(game);
-    }
+
 
     public QTableDto() {// defalut
         this.learningRate = 0.1;
@@ -23,6 +21,7 @@ public class QTableDto extends BaseDto {
         this.explorationRate=0.9;
         ExportingPolicyNetWork =new HashMap<>();
         ImportedPolicyNetWork =QTableDao.getInstance().getImportedMap();
+        QTableDao.getInstance().getImportedMap().clear();
 
     }
     public QTableDto(QTableDto imported) {//RL
@@ -33,6 +32,7 @@ public class QTableDto extends BaseDto {
         this.explorationRate= imported.explorationRate;
         ExportingPolicyNetWork =imported.ExportingPolicyNetWork;
         ImportedPolicyNetWork =QTableDao.getInstance().getImportedMap();
+        QTableDao.getInstance().getImportedMap().clear();
     }
     private Map<String, Set<QEntry>> ExportingPolicyNetWork;
     private Map<String, Set<QEntry>> ImportedPolicyNetWork;

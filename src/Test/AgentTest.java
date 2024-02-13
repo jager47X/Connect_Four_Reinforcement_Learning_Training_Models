@@ -4,7 +4,7 @@ import ReinforceLearning.ReinforceLearningAgentConnectFour;
 import dao.BaseDao;
 import dto.Connect4Dto;
 import dto.QTableDto;
-import Connect4.Connect4;
+import GameEnviroment.Connect4;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

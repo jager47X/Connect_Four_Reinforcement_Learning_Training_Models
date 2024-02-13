@@ -3,7 +3,7 @@ package ReinforceLearning;
 import dto.QEntry;
 import dto.Connect4Dto;
 import dto.QTableDto;
-import Connect4.Connect4;
+import GameEnviroment.Connect4;
 
 import java.util.*;
 
@@ -59,6 +59,33 @@ public abstract class AbstractReinforceLearningAgent2D {
             if (QTable.getExplorationRate() > QTable.getMinExplorationRate()) {
                 QTable.setExplorationRate(QTable.getExplorationRate()*QTable.getExplorationDecay());
             }
+            return legalActions[new Random().nextInt(legalActions.length)];
+        } else {
+            // Exploitation: choose the action with the highest Q-value
+
+            String stateIndex = stateToIndex(this.connect4Dto);
+
+            Set<QEntry> qValues = QTable.getQEntry(stateIndex);
+
+            System.out.println("Q-Values for State " + stateIndex + ":");
+            for (QEntry qEntry : qValues) {
+                Set<Integer> actions = qEntry.getAction();
+                for (Integer action : actions) {
+                    System.out.println("QEntry: Action " + action + " reward: " + qEntry.getQValue(action));
+                }
+            }
+
+            int[] legalActions = getLegalActions();
+
+            return findBestAction(legalActions, qValues);
+
+        }
+    }
+    public int selectAction(int fixedExplorationRate) {
+        if (Math.random() < fixedExplorationRate) {
+            // Exploration: choose a random action
+            System.out.println("Exploration");
+            int[] legalActions = getLegalActions();
             return legalActions[new Random().nextInt(legalActions.length)];
         } else {
             // Exploitation: choose the action with the highest Q-value

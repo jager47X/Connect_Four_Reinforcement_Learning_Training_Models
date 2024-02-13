@@ -1,6 +1,6 @@
 package Test;
 
-import Connect4.Connect4;
+import GameEnviroment.Connect4;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

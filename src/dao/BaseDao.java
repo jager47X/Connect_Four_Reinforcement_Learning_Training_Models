@@ -13,7 +13,8 @@ public abstract class BaseDao {
 
 
 
-    protected static List<String> ImportedGame =new ArrayList<>();
+
+
 
     protected static List<List<String>>  ImportedGames=new ArrayList<>();
 
@@ -26,26 +27,28 @@ public abstract class BaseDao {
     }
 
 
-    public void import_CSV(String fileName) {
+    public void import_CSV(String fileName,int train) {
         CSV csv=new CSV(fileName);
         System.out.print("Importing the Data....");
         try (BufferedReader reader = new BufferedReader(new FileReader(csv.getModel()))) {
             String line;
-            int gameSet=1;
+            int index=0;
 
             while ((line = reader.readLine()) != null) {
-
+                if(train<=index){
+                    break;
+                }
                 // Process each line as needed
-               System.out.println("Processing a CSV line Game:"+gameSet);
-                gameSet=processCSVLine(line,gameSet);
+                int gameLine=index+1;
+               System.out.println("Processing a CSV line Game:"+gameLine);
+                index=processCSVLine(line,index);
             }
 
 
-            System.out.println("SUCCESS : IMPORTING" + csv.getModel());
         } catch (IOException e) {
             System.err.println("Making new File : " +fileName);
         }
-
+        System.out.println("SUCCESS : IMPORTING" + csv.getModel());
     }
 
     public void exportCSV(List<String>  HashedData,String fileName) {
@@ -71,14 +74,16 @@ public abstract class BaseDao {
     }
 
     protected int processCSVLine(String line,int gameSet) {
-        boolean duplicate = false;
+       List<String> ImportedGame =new ArrayList<>();
         String[] data =line.split(",");//game 1 2 3
             System.out.println("new game");
-            ImportedGame.clear();
+
 
         for (int i = 0; i < data.length; i++) {
             ImportedGame.add(i,data[i]);
         }
+        /*takes time
+        boolean duplicate = false;
         for (List<String> existingGame : ImportedGames) {
             duplicate = Arrays.equals(existingGame.toArray(), ImportedGame.toArray());
             if (duplicate) {
@@ -88,13 +93,13 @@ public abstract class BaseDao {
         }
 
         if(!duplicate){
-            List<String> importedGame=new ArrayList<>(ImportedGame);
-            ImportedGames.add(importedGame);
-            System.out.println("data"+Arrays.toString(data));
-            gameSet++;
+
         }
 
-
+        */
+        ImportedGames.add(ImportedGame);
+        System.out.println("data"+Arrays.toString(data));
+        gameSet++;
         return  gameSet;
     }
 

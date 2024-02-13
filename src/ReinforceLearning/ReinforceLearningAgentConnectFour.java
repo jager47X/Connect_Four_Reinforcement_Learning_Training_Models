@@ -4,8 +4,8 @@ package ReinforceLearning;
 
 import dto.Connect4Dto;
 import dto.QTableDto;
-import Connect4.Connect4;
-import Connect4.RuleBasedAI;
+import GameEnviroment.Connect4;
+import GameEnviroment.RuleBasedAI;
 
 import java.util.*;
 
@@ -25,7 +25,7 @@ public class  ReinforceLearningAgentConnectFour extends AbstractReinforceLearnin
 
     public QTableDto SupervisedLearning() {//use multi-thread //if episodes=1 then vs human if not AI vs AI
 
-        QTableDto episode=new QTableDto(Environment);
+        QTableDto episode=new QTableDto(QTable);
         Environment.setActivePlayer(Connect4.PLAYER2);
         Environment.setTurn(0);
 
@@ -68,7 +68,7 @@ public class  ReinforceLearningAgentConnectFour extends AbstractReinforceLearnin
     }
 
     public QTableDto ReinforceLearning() {
-        QTableDto episode = new QTableDto(Environment);
+        QTableDto episode = new QTableDto(QTable);
         Environment.setActivePlayer(Connect4.PLAYER1);
         Environment.setTurn(0);
 
@@ -84,8 +84,10 @@ public class  ReinforceLearningAgentConnectFour extends AbstractReinforceLearnin
             Environment.playerDrop(selectAction());
             StringBuilder stateString = getState();
             String state=stateString.toString();
+
             int currentTurn = connect4Dto.getGame().getCurrentTurn();
             String nextState = QTable.getNextState(currentTurn, state);
+
              QTable.hasNextState=!Objects.equals(nextState, "NULL");
             if (QTable.hasNextState) {
                 int action = Environment.getLocation(Environment.getCurrentTurn());
@@ -96,7 +98,6 @@ public class  ReinforceLearningAgentConnectFour extends AbstractReinforceLearnin
                     reward = Environment.getTotalRewardP1();
                 }
                 updateQValue(state, action, reward, nextState);//update to RL Qtable
-                
             }
 
             Environment.displayBoard();
