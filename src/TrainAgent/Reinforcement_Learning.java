@@ -38,7 +38,7 @@ public class Reinforcement_Learning implements Callable<QTableDto> {
     }
 
     private QTableDto train(){
-
+        System.out.println("training");
         if (agentLock.tryLock()) { try {
             Connect4 game = new Connect4();
             Connect4Dto connect4Dto = new Connect4Dto(game);
@@ -66,9 +66,9 @@ public class Reinforcement_Learning implements Callable<QTableDto> {
 
 
     public static void main(String[] args)  {
-        final int THREAD_POOL_SIZE =200; // Adjust
-        final int TOTAL_THREADS=200;
-        final int TOTAL_TRAINING_EPISODES=1000;
+        final int THREAD_POOL_SIZE =1; // Adjust
+        final int TOTAL_THREADS=1;
+        final int TOTAL_TRAINING_EPISODES=1;
         final int LOOP=TOTAL_TRAINING_EPISODES/TOTAL_THREADS;
 
 
@@ -143,7 +143,7 @@ public class Reinforcement_Learning implements Callable<QTableDto> {
 
             System.out.print("exporting....");
             // Save QTable to JSON file after processing all threads
-            saveQTableToGson(Qtable);
+           Qtable.ToGson();
 
             Duration totalTime = Duration.ofMillis(System.currentTimeMillis() - startTime);
             System.out.println("Total execution time: " + formatDuration(totalTime));
@@ -175,22 +175,7 @@ public class Reinforcement_Learning implements Callable<QTableDto> {
         monitorCPUUsage();
     }
 
-    private static void saveQTableToGson(QTableDto qTable) {
 
-        QTableExportDto exportDto = new QTableExportDto();
-        System.out.println("TrainedModel.json is "+qTable.getExportingPolicyNetWork());
-        exportDto.setExportingPolicyNetWork(qTable.getExportingPolicyNetWork());
-        // Set other fields if needed
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String jsonString = gson.toJson(exportDto);
-
-        try (Writer writer = new FileWriter("TrainedModel.json")) {
-            writer.write(jsonString);
-        } catch (IOException e) {
-            System.err.println("Error saving QTable to JSON: " + e.getMessage());
-        }
-    }
 
 
     private static void monitorCPUUsage() {

@@ -1,10 +1,15 @@
 package dto;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import dao.BaseDao;
 import dao.QTableDao;
 import GameEnviroment.Connect4;
 
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -262,7 +267,19 @@ public class QTableDto extends BaseDto {
             System.out.println("State " + state + " not present in Q-table");
         }
     }
+    public void ToGson() {
 
+        // Set other fields if needed
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String jsonString = gson.toJson(this.ExportingPolicyNetWork);
+
+        try (Writer writer = new FileWriter("TrainedModel.json")) {
+            writer.write(jsonString);
+        } catch (IOException e) {
+            System.err.println("Error saving QTable to JSON: " + e.getMessage());
+        }
+    }
 
 
 
