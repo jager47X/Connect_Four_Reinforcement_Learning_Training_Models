@@ -28,9 +28,7 @@ public abstract class BaseDto {
         HashedData=new ArrayList<>(42);
     }
 
-    public Board getBoard() {
-        return game.getBoard();
-    }
+
 
     public Connect4 getGame() {
         return game;
@@ -40,9 +38,7 @@ public abstract class BaseDto {
         this.game = game;
     }
 
-    public void setBoard(Board board) {
-        this.board = board;
-    }
+
 
     public void setHashedData(List<String> hashedData) {
         HashedData = hashedData;

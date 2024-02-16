@@ -59,8 +59,8 @@ public class Supervised_Learning implements Callable<List<String>> {
 
     public static void main(String[] args)  {
         final int THREAD_POOL_SIZE =2000; // Adjust
-        final int TOTAL_THREADS=20000;
-        final int TOTAL_TRAINING_EPISODES=10000000;
+        final int TOTAL_THREADS=2000;
+        final int TOTAL_TRAINING_EPISODES=100000;
         final int LOOP=TOTAL_TRAINING_EPISODES/TOTAL_THREADS;
 
 
@@ -85,6 +85,7 @@ public class Supervised_Learning implements Callable<List<String>> {
                 for (int episode = 0; episode < TOTAL_THREADS; episode++) {
 
                     Supervised_Learning trainAgent = new Supervised_Learning();
+
                     Future<List<String>> future = executor.submit(trainAgent);
                     futures.add(future);
                     System.out.print("Starting Thread: #"+episode+", ");
@@ -94,34 +95,33 @@ public class Supervised_Learning implements Callable<List<String>> {
                 // Wait for all threads to finish
                 for (Future<List<String>> future : futures) {
 
-                    trainIndex++;
-
 
                     try {
 
                         System.out.println("Processing TOTAL_THREADS: " + Thread.currentThread().getName() + ", Index: " + trainIndex);
-                        long startTimeThread = System.currentTimeMillis();
+                        double  startTimeThread = System.currentTimeMillis();
                         System.out.print("Saving the game... ");
+                        while(!future.isDone()) {
+                            System.out.println("Calculating...");
+                            Thread.sleep(3000);
+                        }
 
                         List<String> threadResult = future.get(5, TimeUnit.SECONDS); // Set your timeout value
 
 
                         if (threadResult != null) {
-
-                            monitorCPUUsage();
-                            System.out.print("Thread adding data... ");
                             exportingData.addAll(threadResult);
+                            trainIndex++;
+                            System.out.print("Future state: ");
                             System.out.println(future.state());
-                            long endTimeThread = System.currentTimeMillis();
-                            System.out.println("Thread execution time: " + (endTimeThread - startTimeThread) + "ms");
 
+                            double endTimeThread = System.currentTimeMillis();
+                            double executionTime= endTimeThread - startTimeThread;
+                            System.out.println("Thread execution time: " + executionTime + "ms");
+                            monitorCPUUsage();
                         } else {
                             System.out.println("Thread result is null. Check the TrainAgent.train() method.");
                         }
-
-
-
-
 
 
                         System.out.println(" Completed: " + trainIndex + "/" + TOTAL_TRAINING_EPISODES);

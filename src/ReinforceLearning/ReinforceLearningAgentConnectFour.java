@@ -42,7 +42,7 @@ public class  ReinforceLearningAgentConnectFour extends AbstractReinforceLearnin
             while(!Environment.playerDrop(RuleBasedAI.makeMove(Environment.getBoard(),Environment.getActivePlayer(),Environment.getNonActivePlayer()))) {//update move
                 Environment.playerDrop(RuleBasedAI.makeMove(Environment.getBoard(),Environment.getActivePlayer(),Environment.getNonActivePlayer()));
             }
-            Environment.displayBoard();
+
             // calculateReward(board.getGame(),);
             if (Environment.winCheck()||Environment.getWinner()==0) {//check winner 1 or 2
                 episode.addLine();

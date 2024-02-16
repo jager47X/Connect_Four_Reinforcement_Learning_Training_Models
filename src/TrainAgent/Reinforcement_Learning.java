@@ -2,25 +2,21 @@ package TrainAgent;
 
 
 import ReinforceLearning.ReinforceLearningAgentConnectFour;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+
 import com.sun.management.OperatingSystemMXBean;
 import dto.Connect4Dto;
-import dto.QEntry;
+
 import dto.QTableDto;
 import GameEnviroment.Connect4;
-import dto.QTableExportDto;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+
 import java.util.concurrent.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -28,7 +24,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Reinforcement_Learning implements Callable<QTableDto> {
 
-    static QTableDto Qtable=new QTableDto();
+    static QTableDto QTable =new QTableDto();
+    private static AtomicReference<List<QTableDto>> ThreadResultList;
     private final Lock agentLock = new ReentrantLock();
     private static final long startTime = System.currentTimeMillis();
 
@@ -42,16 +39,16 @@ public class Reinforcement_Learning implements Callable<QTableDto> {
         if (agentLock.tryLock()) { try {
             Connect4 game = new Connect4();
             Connect4Dto connect4Dto = new Connect4Dto(game);
-            ReinforceLearningAgentConnectFour agent = new ReinforceLearningAgentConnectFour(connect4Dto, Qtable);
+            ReinforceLearningAgentConnectFour agent = new ReinforceLearningAgentConnectFour(connect4Dto, QTable);
 
-            Qtable = agent.ReinforceLearning();
+            QTable = agent.ReinforceLearning();
 
-            if (Qtable.getHashedData() == null || Qtable.getHashedData().isEmpty()) {
+            if (QTable.getHashedData() == null || QTable.getHashedData().isEmpty()) {
                 System.out.println("Warning - hashedData is null or empty.");
                 return new QTableDto();
             } else {
-                System.out.println("hashedData is " + Qtable.getHashedData());
-                return Qtable;
+                System.out.println("hashedData is " + QTable.getHashedData());
+                return QTable;
             }
         } finally {
             agentLock.unlock();
@@ -65,10 +62,10 @@ public class Reinforcement_Learning implements Callable<QTableDto> {
 
 
 
-    public static void main(String[] args)  {
-        final int THREAD_POOL_SIZE =1; // Adjust
-        final int TOTAL_THREADS=1;
-        final int TOTAL_TRAINING_EPISODES=1;
+    public static void main(String[] args) throws InterruptedException {
+        final int THREAD_POOL_SIZE =100; // Adjust
+        final int TOTAL_THREADS=100;
+        final int TOTAL_TRAINING_EPISODES=1000;
         final int LOOP=TOTAL_TRAINING_EPISODES/TOTAL_THREADS;
 
 
@@ -90,41 +87,39 @@ public class Reinforcement_Learning implements Callable<QTableDto> {
                     System.out.print("Starting Thread: #"+episode+", ");
 
                 }
-
+                ThreadResultList= new AtomicReference<>(new ArrayList<>());
                 // Wait for all threads to finish
                 for (Future<QTableDto> future : futures) {
-
-                    trainIndex++;
 
 
                     try {
 
                         System.out.println("Processing TOTAL_THREADS: " + Thread.currentThread().getName() + ", Index: " + trainIndex);
-                        long startTimeThread = System.currentTimeMillis();
+                        double startTimeThread = System.currentTimeMillis();
                         System.out.print("Saving the game... ");
+
+                        while(!future.isDone()) {
+                            System.out.println("Calculating...");
+                            Thread.sleep(3000);
+                        }
+
 
                         QTableDto threadResult = future.get(5, TimeUnit.SECONDS); // Set your timeout value
 
 
                         if (threadResult != null) {
-
-                            monitorCPUUsage();
-                            System.out.print("Thread adding data... ");
-
-                            processQTable(threadResult);
-
+                            ThreadResultList.get().add(threadResult);
+                            trainIndex++;
+                            System.out.print("Future state: ");
                             System.out.println(future.state());
-                            long endTimeThread = System.currentTimeMillis();
-                            System.out.println("Thread execution time: " + (endTimeThread - startTimeThread) + "ms");
 
+                            double endTimeThread = System.currentTimeMillis();
+                            double executionTime= endTimeThread - startTimeThread;
+                            System.out.println("Thread execution time: " + executionTime + "ms");
+                            monitorCPUUsage();
                         } else {
-                            System.out.println("Thread result is null. Check the TrainAgent.train() method.");
+                            System.out.println("Thread result is null.");
                         }
-
-
-
-
-
 
                         System.out.println(" Completed: " + trainIndex + "/" + TOTAL_TRAINING_EPISODES);
 
@@ -140,11 +135,8 @@ public class Reinforcement_Learning implements Callable<QTableDto> {
             } finally {
                 executor.shutdownNow(); // Shutdown the executor immediately in case of exceptions
             }
-
-            System.out.print("exporting....");
-            // Save QTable to JSON file after processing all threads
-           Qtable.ToGson();
-
+            System.out.print("exporting Json....");
+            QTable.ToGson(ThreadResultList);  // Save QTable to JSON file after processing all threads
             Duration totalTime = Duration.ofMillis(System.currentTimeMillis() - startTime);
             System.out.println("Total execution time: " + formatDuration(totalTime));
 
@@ -152,38 +144,14 @@ public class Reinforcement_Learning implements Callable<QTableDto> {
 
     }
 
-    private static void processQTable(QTableDto qTable) {// merge QTables
-
-        // perform statistical analysis
-        int totalEntries = 0;
-        int totalUniqueStates = qTable.getExportingPolicyNetWork().size();
-        int maxActionsForState = 0;
-
-        for (Set<QEntry> entries : qTable.getExportingPolicyNetWork().values()) {
-            totalEntries += entries.size();
-            maxActionsForState = Math.max(maxActionsForState, entries.size());
-        }
-
-        double averageActionsPerState = (double) totalEntries / totalUniqueStates;
-
-        System.out.println("Statistical Analysis:");
-        System.out.println("Total Unique States: " + totalUniqueStates);
-        System.out.println("Total Entries: " + totalEntries);
-        System.out.println("Max Actions for a State: " + maxActionsForState);
-        System.out.println("Average Actions per State: " + averageActionsPerState);
-        System.out.println("-------------------------");
-        monitorCPUUsage();
-    }
-
-
-
 
     private static void monitorCPUUsage() {
         OperatingSystemMXBean osBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
 
         // Print overall CPU usage
-        System.out.println("CPU Usage: " +osBean.getCpuLoad() * 100 + "%");
-
+        if (osBean.getCpuLoad() >0) {
+            System.out.println("\nCPU Usage: " +osBean.getCpuLoad() * 100 + "%");
+        }
 
     }
     private static String formatDuration(Duration duration) {

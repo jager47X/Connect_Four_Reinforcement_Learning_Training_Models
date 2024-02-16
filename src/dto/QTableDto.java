@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 public class QTableDto extends BaseDto {
 
 
-    public QTableDto() {// defalut
+    public QTableDto() {// default
         this.learningRate = 0.1;
         this.discountFactor = 0.9;
         this.minExplorationRate = 0.1;
@@ -38,6 +39,7 @@ public class QTableDto extends BaseDto {
         ExportingPolicyNetWork =imported.ExportingPolicyNetWork;
         ImportedPolicyNetWork =QTableDao.getInstance().getImportedMap();
         QTableDao.getInstance().getImportedMap().clear();
+        this.game=new Connect4();
     }
     private Map<String, Set<QEntry>> ExportingPolicyNetWork;
     private Map<String, Set<QEntry>> ImportedPolicyNetWork;
@@ -50,6 +52,12 @@ public class QTableDto extends BaseDto {
 
     public void setImportedPolicyNetWork(Map<String, Set<QEntry>> importedPolicyNetWork) {
         ImportedPolicyNetWork = importedPolicyNetWork;
+    }
+    public Map<String, Set<QEntry>> getExportingPolicyNetWork() {
+        return ExportingPolicyNetWork;
+    }
+    public void setExportingPolicyNetWork(Map<String, Set<QEntry>> exportingPolicyNetWork) {
+        this.ExportingPolicyNetWork = exportingPolicyNetWork;
     }
 
     double learningRate;
@@ -140,11 +148,8 @@ public class QTableDto extends BaseDto {
                         state.append(location.get(index));
                     }
 
-                    int currentTurn=turn+1;
-               //     System.out.println("turn:"+currentTurn);
-               //     System.out.println("current Qtable:Saving state:"+state);
-                //    System.out.println("current Qtable:Saving action:"+action+", reward:"+qvalue);
-                    updateQTable(state.toString(),  action, qvalue);
+                    //int currentTurn=turn+1;
+                  updateQTable(state.toString(),  action, qvalue);
                 }
     }
 
@@ -194,13 +199,7 @@ public class QTableDto extends BaseDto {
 
         return this;
     }
-    public Map<String, Set<QEntry>> getExportingPolicyNetWork() {
-        return ExportingPolicyNetWork;
-    }
 
-    public void setExportingPolicyNetWork(Map<String, Set<QEntry>> exportingPolicyNetWork) {
-        this.ExportingPolicyNetWork = exportingPolicyNetWork;
-    }
     public Set<QEntry> getQEntry(String state) {
         if (!ImportedPolicyNetWork.containsKey(state)) {
             System.out.println("The state is absent on the QTableDao.getInstance().get QTable()");
@@ -256,10 +255,7 @@ public class QTableDto extends BaseDto {
             for (QEntry qEntry : qTableEntry) {
                 if (qEntry.getQEntry().containsKey(action)) {
                     qEntry.updateQEntry(action,updatedQValue);
-                    //  may need to put the updated QEntry back into the set
-                    // qTableEntry.remove(qEntry);
-                    // qTableEntry.add(qEntry);
-                    ImportedPolicyNetWork.get(state).add(qEntry);
+                   ImportedPolicyNetWork.get(state).add(qEntry);
                     break; // Exit the loop once the action is found
                 }
             }
@@ -267,18 +263,22 @@ public class QTableDto extends BaseDto {
             System.out.println("State " + state + " not present in Q-table");
         }
     }
-    public void ToGson() {
+    public void ToGson(AtomicReference<List<QTableDto>> ExportingData) {
 
         // Set other fields if needed
-
+        String jsonString = null;
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String jsonString = gson.toJson(this.ExportingPolicyNetWork);
-
-        try (Writer writer = new FileWriter("TrainedModel.json")) {
-            writer.write(jsonString);
-        } catch (IOException e) {
-            System.err.println("Error saving QTable to JSON: " + e.getMessage());
+        for (int i = 0; i < ExportingData.get().size(); i++) {
+            jsonString = gson.toJson(ExportingData.get().get(i));
         }
+        if(jsonString!=null){
+            try (Writer writer = new FileWriter("TrainedModel.json")) {
+                writer.write(jsonString);
+            } catch (IOException e) {
+                System.err.println("Error saving QTable to JSON: " + e.getMessage());
+            }
+        }
+
     }
 
 
